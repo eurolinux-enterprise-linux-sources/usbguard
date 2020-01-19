@@ -1,0 +1,1197 @@
+diff --git a/Makefile.am b/Makefile.am
+index 37273fb..37508d4 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -310,18 +310,24 @@ usbguard_daemon_SOURCES=\
+ 	src/Daemon/Seccomp.c \
+ 	src/Daemon/Seccomp.h \
+ 	src/Common/Utility.hpp \
+-	src/Common/Utility.cpp
++	src/Common/Utility.cpp \
++	src/Daemon/FileAuditBackend.hpp \
++	src/Daemon/FileAuditBackend.cpp \
++	src/Daemon/LinuxAuditBackend.hpp \
++	src/Daemon/LinuxAuditBackend.cpp
+ 
+ usbguard_daemon_CPPFLAGS=\
+ 	-fPIE \
+ 	$(AM_CPPFLAGS) \
+ 	@seccomp_CFLAGS@ \
+-	@libcapng_CFLAGS@
++	@libcapng_CFLAGS@ \
++	@audit_CFLAGS@
+ 
+ usbguard_daemon_LDADD=\
+ 	$(top_builddir)/libusbguard.la \
+ 	@seccomp_LIBS@ \
+-	@libcapng_LIBS@
++	@libcapng_LIBS@ \
++	@audit_LIBS@
+ 
+ EXTRA_DIST +=\
+ 	README.md \
+diff --git a/configure.ac b/configure.ac
+index 6ab0d9b..3298929 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -230,6 +230,14 @@ AC_SUBST([crypto_LIBS])
+ #
+ # Check for optional libraries
+ #
++PKG_CHECK_MODULES([audit], [audit >= 2.7.7],
++[AC_DEFINE([HAVE_LINUX_AUDIT], [1], [Linux Audit API available])
++AC_CHECK_DECLS([audit_encode_nv_string], [], [], [[#include<libaudit.h>]])
++libaudit_summary="system-wide; $audit_LIBS"],
++[AC_MSG_NOTICE([libaudit development files not found! Linux Audit support wille be turned OFF])
++libaudit_summary="not found"]
++)
++
+ PKG_CHECK_MODULES([seccomp], [libseccomp >= 2.0.0],
+ [AC_DEFINE([HAVE_SECCOMP], [1], [seccomp API usable])
+ libseccomp_summary="system-wide; $seccomp_LIBS"],
+@@ -752,6 +760,7 @@ echo "## Libraries"
+ echo
+ echo "      libqb: $libqb_summary"
+ echo "     crypto: $crypto_summary"
++echo "   libaudit: $libaudit_summary"
+ echo " libseccomp: $libseccomp_summary"
+ echo "  libcap-ng: $libcap_ng_summary"
+ echo "   protobuf: $protobuf_summary"
+diff --git a/doc/usbguard-daemon.conf.5 b/doc/usbguard-daemon.conf.5
+index 476a31e..313f5fb 100644
+--- a/doc/usbguard-daemon.conf.5
++++ b/doc/usbguard-daemon.conf.5
+@@ -96,6 +96,12 @@ might not match the device after rebooting the system.
+ .RS
+ .RE
+ .TP
++.B \f[B]AuditBackend\f[]=<\f[I]backend\f[]>
++USBGuard audit events log backend.
++Backend should be one of \f[C]FileAudit\f[] or \f[C]LinuxAudit\f[].
++.RS
++.RE
++.TP
+ .B \f[B]AuditFilePath\f[]=<\f[I]filepath\f[]>
+ USBGuard audit events log file path.
+ .RS
+diff --git a/doc/usbguard-daemon.conf.5.md b/doc/usbguard-daemon.conf.5.md
+index 58ca0ba..ef9ca7c 100644
+--- a/doc/usbguard-daemon.conf.5.md
++++ b/doc/usbguard-daemon.conf.5.md
+@@ -45,6 +45,9 @@ The **usbguard-daemon.conf** file is loaded by the USBGuard daemon after it pars
+ **DeviceRulesWithPort**=<*boolean*>
+ :   Generate device specific rules including the "via-port" attribute. This option modifies the behavior of the allowDevice action. When instructed to generate a permanent rule, the action can generate a port specific rule. Because some systems have unstable port numbering, the generated rule might not match the device after rebooting the system.
+ 
++**AuditBackend**=<*backend*>
++:   USBGuard audit events log backend. Backend should be one of `FileAudit` or `LinuxAudit`.
++
+ **AuditFilePath**=<*filepath*>
+ :   USBGuard audit events log file path.
+ 
+diff --git a/src/Common/Utility.cpp b/src/Common/Utility.cpp
+index 237acfb..af9585f 100644
+--- a/src/Common/Utility.cpp
++++ b/src/Common/Utility.cpp
+@@ -365,6 +365,25 @@ namespace usbguard
+     }
+   }
+ 
++  bool hasSuffix(const std::string& value, const std::string& suffix)
++  {
++    if (suffix.size() > value.size()) {
++      return false;
++    }
++    const auto pos = value.size() - suffix.size();
++    const auto cmp = value.compare(pos, suffix.size(), suffix);
++    return cmp == 0;
++  }
++
++  bool hasPrefix(const std::string& value, const std::string& prefix)
++  {
++    if (prefix.size() > value.size()) {
++      return false;
++    }
++    const auto cmp = value.compare(0, prefix.size(), prefix);
++    return cmp == 0;
++  }
++
+   std::string symlinkPath(const std::string& linkpath, struct stat *st_user)
+   {
+     struct stat st = { };
+diff --git a/src/Common/Utility.hpp b/src/Common/Utility.hpp
+index 54e1ea1..2458930 100644
+--- a/src/Common/Utility.hpp
++++ b/src/Common/Utility.hpp
+@@ -185,6 +185,12 @@ namespace usbguard
+   std::string removePrefix(const std::string& prefix, const std::string& value);
+ 
+   /**
++   * Test whether a string value has a prefix/suffix.
++   */
++  bool hasSuffix(const std::string& value, const std::string& suffix);
++  bool hasPrefix(const std::string& value, const std::string& prefix);
++
++  /**
+    * Read symlink destination.
+    */
+   std::string symlinkPath(const std::string& linkpath, struct stat *st_user = nullptr);
+diff --git a/src/Daemon/Daemon.cpp b/src/Daemon/Daemon.cpp
+index 89d60b3..91c0483 100644
+--- a/src/Daemon/Daemon.cpp
++++ b/src/Daemon/Daemon.cpp
+@@ -22,6 +22,8 @@
+ #endif
+ 
+ #include "Daemon.hpp"
++#include "FileAuditBackend.hpp"
++#include "LinuxAuditBackend.hpp"
+ #include "Common/Utility.hpp"
+ 
+ #include "usbguard/Logger.hpp"
+@@ -62,7 +64,8 @@ namespace usbguard
+     "RestoreControllerDeviceState",
+     "DeviceManagerBackend",
+     "IPCAccessControlFiles",
+-    "AuditFilePath"
++    "AuditFilePath",
++    "AuditBackend"
+   };
+ 
+   static const std::vector<std::pair<std::string,Daemon::DevicePolicyMethod> > device_policy_method_strings = {
+@@ -95,7 +98,8 @@ namespace usbguard
+ 
+   Daemon::Daemon()
+     : _config(G_config_known_names),
+-      _ruleset(this)
++      _ruleset(this),
++      _audit(_audit_identity)
+   {
+     sigset_t signal_set;
+     sigfillset(&signal_set);
+@@ -245,11 +249,48 @@ namespace usbguard
+       loadIPCAccessControlFiles(value);
+     }
+ 
+-    /* AuditFilePath */
+-    if (_config.hasSettingValue("AuditFilePath")) {
+-      const std::string value = _config.getSettingValue("AuditFilePath");
+-      USBGUARD_LOG(Debug) << "Setting AuditFilePath to " << value;
+-      USBGUARD_LOGGER.setAuditFile(true, value);
++    /* AuditBackend */
++    if (_config.hasSettingValue("AuditBackend")) {
++      const std::string value = _config.getSettingValue("AuditBackend");
++      USBGUARD_LOG(Debug) << "Setting AuditBackend to " << value;
++
++      if (value == "LinuxAudit") {
++        std::unique_ptr<AuditBackend> backend(new LinuxAuditBackend());
++        _audit.setBackend(std::move(backend));
++      }
++      else if (value == "FileAudit") {
++        if (_config.hasSettingValue("AuditFilePath")) {
++          const std::string value = _config.getSettingValue("AuditFilePath");
++          USBGUARD_LOG(Debug) << "Setting AuditFilePath to " << value;
++          USBGUARD_LOGGER.setAuditFile(true, value);
++        }
++        else {
++          /* AuditFilePath value is required is AuditBackend is set to FileAudit */
++          throw Exception("Configuration", "AuditBackend", "AuditFilePath not set");
++        }
++
++        std::unique_ptr<AuditBackend> backend(new FileAuditBackend());
++        _audit.setBackend(std::move(backend));
++      }
++      else {
++        throw Exception("Configuration", "AuditBackend", "Invalid value");
++      }
++    }
++    else {
++      /*
++       * Left for backwards compatibility. If AuditBackend is NOT set, but
++       * AuditFilePath is, we set the backend to FileAudit automatically.
++       */
++
++      /* AuditFilePath */
++      if (_config.hasSettingValue("AuditFilePath")) {
++        const std::string value = _config.getSettingValue("AuditFilePath");
++        USBGUARD_LOG(Debug) << "Setting AuditFilePath to " << value;
++        USBGUARD_LOGGER.setAuditFile(true, value);
++
++        std::unique_ptr<AuditBackend> backend(new LinuxAuditBackend());
++        _audit.setBackend(std::move(backend));
++      }
+     }
+ 
+     USBGUARD_LOG(Info) << "Configuration loaded successfully.";
+@@ -605,7 +646,7 @@ namespace usbguard
+     USBGUARD_LOG(Trace) << "event=" << DeviceManager::eventTypeToString(event)
+                         << " device_ptr=" << device.get();
+ 
+-    auto audit_event = Audit::deviceEvent(_audit_identity, device, event);
++    auto audit_event = _audit.deviceEvent(device, event);
+ 
+     std::shared_ptr<const Rule> device_rule = \
+       device->getDeviceRule(/*with_port*/true,
+@@ -648,8 +689,7 @@ namespace usbguard
+     USBGUARD_LOG(Trace) << "device_ptr=" << device.get()
+                         << " matched_rule_ptr=" << matched_rule.get();
+ 
+-    auto audit_event = Audit::policyEvent(_audit_identity,
+-        device, device->getTarget(), matched_rule->getTarget());
++    auto audit_event = _audit.policyEvent(device, device->getTarget(), matched_rule->getTarget());
+ 
+     const Rule::Target target_old = device->getTarget();
+     std::shared_ptr<Device> device_post = \
+diff --git a/src/Daemon/Daemon.hpp b/src/Daemon/Daemon.hpp
+index 065deaf..6461f45 100644
+--- a/src/Daemon/Daemon.hpp
++++ b/src/Daemon/Daemon.hpp
+@@ -129,5 +129,6 @@ namespace usbguard
+     bool _restore_controller_device_state;
+ 
+     AuditIdentity _audit_identity;
++    Audit _audit;
+   };
+ } /* namespace usbguard */
+diff --git a/src/Daemon/FileAuditBackend.cpp b/src/Daemon/FileAuditBackend.cpp
+new file mode 100644
+index 0000000..2d53008
+--- /dev/null
++++ b/src/Daemon/FileAuditBackend.cpp
+@@ -0,0 +1,47 @@
++//
++// Copyright (C) 2017 Red Hat, Inc.
++//
++// This program is free software; you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation; either version 2 of the License, or
++// (at your option) any later version.
++//
++// This program is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with this program.  If not, see <http://www.gnu.org/licenses/>.
++//
++// Authors: Daniel Kopecek <dkopecek@redhat.com>
++//
++#include "FileAuditBackend.hpp"
++
++#include <Common/Utility.hpp>
++
++namespace usbguard
++{
++  void FileAuditBackend::write(const AuditEvent& event)
++  {
++    std::string message;
++
++    message.append("uid=");
++    message.append(numberToString(event.identity().uid()));
++    message.append(" ");
++
++    message.append("pid=");
++    message.append(numberToString(event.identity().pid()));
++    message.append(" ");
++
++    for (const auto& kv_pair : event.keys()) {
++      message.append(kv_pair.first);
++      message.append("='");
++      message.append(kv_pair.second);
++      message.append("' ");
++    }
++
++    USBGUARD_LOG(Audit) << message;
++  }
++}
++/* vim: set ts=2 sw=2 et */
+\ No newline at end of file
+diff --git a/src/Daemon/FileAuditBackend.hpp b/src/Daemon/FileAuditBackend.hpp
+new file mode 100644
+index 0000000..d29a1fe
+--- /dev/null
++++ b/src/Daemon/FileAuditBackend.hpp
+@@ -0,0 +1,31 @@
++//
++// Copyright (C) 2017 Red Hat, Inc.
++//
++// This program is free software; you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation; either version 2 of the License, or
++// (at your option) any later version.
++//
++// This program is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with this program.  If not, see <http://www.gnu.org/licenses/>.
++//
++// Authors: Daniel Kopecek <dkopecek@redhat.com>
++//
++#pragma once
++
++#include <usbguard/Audit.hpp>
++
++namespace usbguard
++{
++  class FileAuditBackend : public AuditBackend
++  {
++  public:
++    void write(const AuditEvent& event);
++  };
++}
++/* vim: set ts=2 sw=2 et */
+\ No newline at end of file
+diff --git a/src/Daemon/LinuxAuditBackend.cpp b/src/Daemon/LinuxAuditBackend.cpp
+new file mode 100644
+index 0000000..cbd4e2c
+--- /dev/null
++++ b/src/Daemon/LinuxAuditBackend.cpp
+@@ -0,0 +1,305 @@
++//
++// Copyright (C) 2017 Red Hat, Inc.
++//
++// This program is free software; you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation; either version 2 of the License, or
++// (at your option) any later version.
++//
++// This program is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with this program.  If not, see <http://www.gnu.org/licenses/>.
++//
++// Authors: Daniel Kopecek <dkopecek@redhat.com>
++//
++#ifdef HAVE_BUILD_CONFIG_H
++#include <build-config.h>
++#endif
++
++#include "LinuxAuditBackend.hpp"
++
++#include <usbguard/Exception.hpp>
++#include <usbguard/Logger.hpp>
++#include "Common/Utility.hpp"
++#include "Library/Utility.hpp"
++
++#include <stdexcept>
++
++#if defined(HAVE_LINUX_AUDIT)
++#include <libaudit.h>
++
++#ifndef AUDIT_USER_DEVICE
++#define AUDIT_USER_DEVICE 1137 /* User space hotplug device changes */
++#endif
++
++#if !defined(HAVE_DECL_AUDIT_ENCODE_NV_STRING)
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE 1
++#endif
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++  /*
++   * Audit message encoding functions based on:
++   *  https://github.com/linux-audit/audit-userspace/blob/f7cd4d6/lib/audit_logging.c#L125
++   */
++
++  /*
++  * This function checks a string to see if it needs encoding.
++  * It returns true if needed and false if not.
++  */
++  static bool audit_value_needs_encoding(const char *str, unsigned int size)
++  {
++    if (str == NULL) {
++      return false;
++    }
++
++    for (unsigned int i = 0; i < size; i++) {
++      // we don't test for > 0x7f because str[] is signed.
++      if (str[i] == '"' || str[i] < 0x21 || str[i] == 0x7F) {
++        return true;
++      }
++    }
++    return false;
++  }
++
++  /*
++  * This function does encoding of "untrusted" names just like the kernel
++  */
++  static char *audit_encode_value(char *final, const char *buf, unsigned int size)
++  {
++    char *ptr = final;
++    const char *hex = "0123456789ABCDEF";
++
++    if (final == NULL)
++      return NULL;
++
++    if (buf == NULL) {
++      *final = 0;
++      return final;
++    }
++
++    for (unsigned int i = 0; i < size; i++) {
++      *ptr++ = hex[(buf[i] & 0xF0)>>4]; /* Upper nibble */
++      *ptr++ = hex[buf[i] & 0x0F];      /* Lower nibble */
++    }
++    *ptr = 0;
++    return final;
++  }
++
++  static char *audit_encode_nv_string(const char *name, const char *value, unsigned int vlen)
++  {
++    char *str = nullptr;
++    if (vlen == 0 && value) {
++      vlen = ::strlen(value);
++    }
++    if (value && audit_value_needs_encoding(value, vlen)) {
++      char *tmp = reinterpret_cast<char*>(::malloc(2*vlen + 1));
++      if (tmp) {
++        audit_encode_value(tmp, value, vlen);
++        if (::asprintf(&str, "%s=%s", name, tmp) < 0) {
++          str = nullptr;
++        }
++        free(tmp);
++      }
++      else {
++        str = nullptr;
++      }
++    }
++    else {
++      if (::asprintf(&str, "%s=\"%s\"", name, value ? value : "?") < 0) {
++        str = nullptr;
++      }
++    }
++    return str;
++  }
++#endif /* HAVE_DECL_AUDIT_ENCODE_NV_STRING */
++#endif /* HAVE_LINUX_AUDIT */
++
++namespace usbguard
++{
++#if defined(HAVE_LINUX_AUDIT)
++  static std::string encodeMessageNVPair(const std::string& key, const std::string& value)
++  {
++    std::unique_ptr<char, FreeDeleter> encoded_cstr(audit_encode_nv_string(key.c_str(), value.c_str(), value.size()));
++    std::string encoded(encoded_cstr.get());
++    return encoded;
++  }
++
++  static void appendToMessage(std::string& message, const std::string& key, const std::string& value)
++  {
++    if (message.size() > 0) {
++      message.append(" ");
++    }
++    message.append(encodeMessageNVPair(key, value));
++  }
++
++  static std::string translateTypeValue(const std::string& value)
++  {
++    if (hasPrefix(value, "Policy.Device.")) {
++      /* device policy events */
++      if (hasSuffix(value, "Update")) {
++        return "changed-authorization-state-for";
++      }
++      throw std::runtime_error("LinuxAuditBackend: unexpected Policy.Device event");
++    }
++    else if (hasPrefix(value, "Device.")) {
++      /* device events */
++      if (hasSuffix(value, "Present")) {
++        return "discovered-device";
++      }
++      if (hasSuffix(value, "Insert")) {
++        return "inserted-device";
++      }
++      if (hasSuffix(value, "Update")) {
++        return "updated-device";
++      }
++      if (hasSuffix(value, "Remove")) {
++        return "removed-device";
++      }
++      throw std::runtime_error("LinuxAuditBackend: unexpected Device event");
++    }
++    else if (hasPrefix(value, "Policy.")) {
++      /* rule set modification events */
++      if (hasSuffix(value, "Insert")) {
++        return "inserted-policy-rule";
++      }
++      if (hasSuffix(value, "Update")) {
++        return "updated-policy-rule";
++      }
++      if (hasSuffix(value, "Remove")) {
++        return "removed-policy-rule";
++      }
++      throw std::runtime_error("LinuxAuditBackend: unexpected Policy event");
++    }
++
++    throw std::runtime_error("LinuxAuditBackend: unexpected type= key value");
++  }
++#endif
++
++  LinuxAuditBackend::LinuxAuditBackend()
++  {
++#if defined(HAVE_LINUX_AUDIT)
++    USBGUARD_LOG(Debug) << "Opening Linux Audit socket";
++    if ((_audit_fd = audit_open()) < 0) {
++      throw ErrnoException("LinuxAuditBackend", "audit_open", errno);
++    }
++#else
++    (void)_audit_fd;
++    throw std::runtime_error("LinuxAuditBackend: not supported");
++#endif
++  }
++
++  LinuxAuditBackend::~LinuxAuditBackend()
++  {
++#if defined(HAVE_LINUX_AUDIT)
++    USBGUARD_LOG(Debug) << "Closing Linux Audit socket";
++    audit_close(_audit_fd);
++#endif
++  }
++
++  void LinuxAuditBackend::write(const AuditEvent& event)
++  {
++#if defined(HAVE_LINUX_AUDIT)
++    std::string message;
++    /*
++     * Linux Audit event result
++     *  0 = failed
++     *  1 = success
++     */
++    int result = 0;
++    auto kvals = event.keys();
++
++    std::string audit_key;
++    std::string audit_value;
++
++    if (kvals.count("type") > 0) {
++      audit_key = "op";
++      audit_value = translateTypeValue(kvals["type"]);
++      appendToMessage(message, audit_key, audit_value);
++      kvals.erase("type");
++    }
++    else {
++      throw std::runtime_error("missing required type field in the audit event");
++    }
++
++    if (kvals.count("result") > 0) {
++      if (kvals["result"] == "SUCCESS") {
++        result = 1;
++      }
++      kvals.erase("result");
++    }
++    else {
++      throw std::runtime_error("missing required result field in the audit event");
++    }
++ 
++    if (kvals.count("device.system_name") > 0) {
++      audit_key = "device";
++      audit_value = kvals["device.system_name"];
++      appendToMessage(message, audit_key, audit_value);
++      kvals.erase("device.system_name");
++    }
++
++    if (kvals.count("rule") > 0) {
++      audit_key = "rule";
++      audit_value = kvals["rule"];
++      appendToMessage(message, audit_key, audit_value);
++      kvals.erase("rule");
++    }
++
++    for (const auto& kv_pair : kvals) {
++      const std::string& key = kv_pair.first;
++      const std::string& value = kv_pair.second;
++
++      audit_key.clear();
++      audit_value.clear();
++ 
++      if (key == "device.rule") {
++        audit_key = "device_rule";
++        audit_value = value;
++      }
++      else if (key == "device.rule.new") {
++        audit_key = "device_rule";
++        audit_value = value;
++      }
++      else if (key == "target") {
++        audit_key = "target";
++        audit_value = value;
++      }
++      else if (key == "target.new") {
++        audit_key = "target";
++        audit_value = value;
++      }
++      else if (key == "rule.id") {
++        audit_key = "rule_id";
++        audit_value = value;
++      }
++      else if (key == "rule.new") {
++        audit_key = "rule";
++        audit_value = value;
++      }
++      /*
++       * Skip appending the key=value pair to the message, if the
++       * audit_key string is empty. This is used to skip key=value
++       * pairs that we don't want to include in the Linux Audit trail.
++       */
++      if (!audit_key.empty()) {
++        appendToMessage(message, audit_key, audit_value);
++      }
++    }
++
++    USBGUARD_LOG(Debug) << "Writing Linux Audit message: " << message;
++    audit_log_user_message(_audit_fd, AUDIT_USER_DEVICE, message.c_str(),
++      /*hostname=*/nullptr, /*addr=*/nullptr, /*tty=*/nullptr, result);
++#else
++    (void)event;
++    throw std::runtime_error("LinuxAuditBackend::write: not supported");
++#endif
++  }
++}
++/* vim: set ts=2 sw=2 et */
+\ No newline at end of file
+diff --git a/src/Daemon/LinuxAuditBackend.hpp b/src/Daemon/LinuxAuditBackend.hpp
+new file mode 100644
+index 0000000..647c045
+--- /dev/null
++++ b/src/Daemon/LinuxAuditBackend.hpp
+@@ -0,0 +1,37 @@
++//
++// Copyright (C) 2017 Red Hat, Inc.
++//
++// This program is free software; you can redistribute it and/or modify
++// it under the terms of the GNU General Public License as published by
++// the Free Software Foundation; either version 2 of the License, or
++// (at your option) any later version.
++//
++// This program is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License
++// along with this program.  If not, see <http://www.gnu.org/licenses/>.
++//
++// Authors: Daniel Kopecek <dkopecek@redhat.com>
++//
++#pragma once
++
++#include <usbguard/Audit.hpp>
++
++namespace usbguard
++{
++  class LinuxAuditBackend : public AuditBackend
++  {
++  public:
++    LinuxAuditBackend();
++    ~LinuxAuditBackend();
++
++    void write(const AuditEvent& event);
++
++  private:
++    int _audit_fd{-1};
++  };
++}
++/* vim: set ts=2 sw=2 et */
+\ No newline at end of file
+diff --git a/src/Library/UEventDeviceManager.cpp b/src/Library/UEventDeviceManager.cpp
+index bdf4ad0..2f44ff0 100644
+--- a/src/Library/UEventDeviceManager.cpp
++++ b/src/Library/UEventDeviceManager.cpp
+@@ -149,6 +149,11 @@ namespace usbguard {
+     return hub_interface.appliesTo(getInterfaceTypes()[0]);
+   }
+ 
++  std::string UEventDevice::getSystemName() const
++  {
++    return getSysPath();
++  }
++
+   void UEventDevice::parseUSBDescriptor(USBDescriptorParser* parser, const USBDescriptor* descriptor_raw, USBDescriptor* descriptor_out)
+   {
+     USBGUARD_LOG(Trace);
+diff --git a/src/Library/UEventDeviceManager.hpp b/src/Library/UEventDeviceManager.hpp
+index b7adb60..7de6951 100644
+--- a/src/Library/UEventDeviceManager.hpp
++++ b/src/Library/UEventDeviceManager.hpp
+@@ -49,6 +49,7 @@ namespace usbguard {
+     SysFSDevice& sysfsDevice();
+     const std::string& getSysPath() const;
+     bool isController() const override;
++    std::string getSystemName() const override;
+ 
+   private:
+     void parseUSBDescriptor(USBDescriptorParser* parser, const USBDescriptor* descriptor_raw, USBDescriptor* descriptor_out) override;
+diff --git a/src/Library/public/usbguard/Audit.cpp b/src/Library/public/usbguard/Audit.cpp
+index e692733..60bbd1b 100644
+--- a/src/Library/public/usbguard/Audit.cpp
++++ b/src/Library/public/usbguard/Audit.cpp
+@@ -41,73 +41,120 @@ namespace usbguard
+     _pid = pid;
+   }
+ 
++  uid_t AuditIdentity::uid() const
++  {
++    return _uid;
++  }
++
++  pid_t AuditIdentity::pid() const
++  {
++    return _pid;
++  }
++
+   std::string AuditIdentity::toString() const
+   {
+     std::string identity_string;
+ 
+     identity_string.append("{ uid=");
+-    identity_string.append(numberToString(_uid));
++    identity_string.append(numberToString(uid()));
+     identity_string.append(" pid=");
+-    identity_string.append(numberToString(_pid));
++    identity_string.append(numberToString(pid()));
+     identity_string.append(" }");
+ 
+     return identity_string;
+   }
+ 
+-  AuditEvent::AuditEvent(const AuditIdentity& identity)
+-    : _confirmed(false),
+-      _identity(identity)
++  AuditEvent::AuditEvent(const AuditIdentity& identity, std::shared_ptr<AuditBackend>& backend)
++    : _commited(false),
++      _identity(identity),
++      _backend(backend)
+   {
+-
+   }
+ 
+   AuditEvent::AuditEvent(AuditEvent&& event)
+-    : _confirmed(event._confirmed),
++    : _commited(event._commited),
+       _identity(std::move(event._identity)),
+-      _message(std::move(event._message))
++      _backend(std::move(event._backend)),
++      _keys(std::move(event._keys))
+   {
+-    event.setConfirmed(true);
++    /*
++     * Mark the source event as commited so that
++     * when it gets destructed, it won't be commited
++     * to the backend.
++     */
++    event.setCommited(true);
+   }
+ 
+   AuditEvent::~AuditEvent()
+   {
+-    if (!_confirmed) {
++    /*
++     * If the event was not commited explicitly, assume
++     * that that the result is a failure.
++     */
++    if (!_commited) {
+       failure();
+     }
+   }
+ 
+-  void AuditEvent::confirm(const std::string& result)
++  void AuditEvent::commit(const std::string& result)
+   {
+-    USBGUARD_LOG(Audit) << "result=" << result \
+-      << " identity=" << _identity.toString() \
+-      << " " << _message;
+-    setConfirmed(true);
++    setKey("result", result);
++    _backend->commit(*this);
++    setCommited(true);
+   }
+ 
+   void AuditEvent::success()
+   {
+-    confirm("SUCCESS");
++    commit("SUCCESS");
+   }
+ 
+   void AuditEvent::failure()
+   {
+-    confirm("FAILURE");
++    commit("FAILURE");
++  }
++
++  const AuditIdentity& AuditEvent::identity() const
++  {
++    return _identity;
+   }
+ 
+-  void AuditEvent::setConfirmed(bool state)
++  const AuditEvent::Keys& AuditEvent::keys() const
+   {
+-    _confirmed = state;
++    return _keys;
+   }
+ 
+-  std::string& AuditEvent::refMessage()
++  void AuditEvent::setCommited(bool state)
+   {
+-    return _message;
++    _commited = state;
++  }
++
++  void AuditEvent::setKey(const std::string& key, const std::string& value)
++  {
++    _keys.emplace(key, value);
++  }
++
++  AuditBackend::AuditBackend()
++  {
++  }
++
++  AuditBackend::~AuditBackend()
++  {
++  }
++
++  void AuditBackend::commit(const AuditEvent& event)
++  {
++    std::unique_lock<std::mutex> lock(_mutex);
++    write(event);
+   }
+ 
+   Audit::Audit(const AuditIdentity& identity)
+     : _identity(identity)
+   {
++  }
+ 
++  void Audit::setBackend(std::unique_ptr<AuditBackend> backend)
++  {
++    _backend = std::shared_ptr<AuditBackend>(std::move(backend));
+   }
+ 
+   AuditEvent Audit::policyEvent(std::shared_ptr<Rule> rule, Policy::EventType event)
+@@ -140,116 +187,74 @@ namespace usbguard
+     return deviceEvent(_identity, new_device, old_device);
+   }
+ 
+-  AuditEvent Audit::policyEvent(const AuditIdentity& identity, std::shared_ptr<Rule> rule, Policy::EventType event)
++  AuditEvent Audit::policyEvent(const AuditIdentity& identity, std::shared_ptr<Rule> rule, Policy::EventType event_type)
+   {
+-    AuditEvent audit_event(identity);
+-    auto& message = audit_event.refMessage();
+-
+-    message += "type=Policy.";
+-    message += Policy::eventTypeToString(event);
+-
+-    message += " rule.id=";
+-    message += numberToString(rule->getRuleID());
+-
+-    message += " rule='";
+-    message += rule->toString();
+-    message += "'";
+-
+-    return audit_event;
++    AuditEvent event(identity, _backend);
++ 
++    event.setKey("type", std::string("Policy.") + Policy::eventTypeToString(event_type));
++    event.setKey("rule.id", numberToString(rule->getRuleID()));
++    event.setKey("rule", rule->toString());
++ 
++    return event;
+   }
+ 
+   AuditEvent Audit::policyEvent(const AuditIdentity& identity, std::shared_ptr<Rule> new_rule, std::shared_ptr<Rule> old_rule)
+   {
+-    AuditEvent audit_event(identity);
+-    auto& message = audit_event.refMessage();
+-
+-    message += "type=Policy.";
+-    message += Policy::eventTypeToString(Policy::EventType::Update);
+-
+-    message += " rule.id=";
+-    message += numberToString(old_rule->getRuleID());
+-
+-    message += " rule.old='";
+-    message += old_rule->toString();
+-    message += "'";
+-    
+-    message += " rule.new='";
+-    message += new_rule->toString();
+-    message += "'";
+-
+-    return audit_event;
++    AuditEvent event(identity, _backend);
++ 
++    event.setKey("type", std::string("Policy.") + Policy::eventTypeToString(Policy::EventType::Update));
++    event.setKey("rule.id", numberToString(old_rule->getRuleID()));
++    event.setKey("rule.old", old_rule->toString());
++    event.setKey("rule.new", new_rule->toString());
++ 
++    return event;
+   }
+ 
+-  AuditEvent Audit::policyEvent(const AuditIdentity& identity, std::shared_ptr<Device> device, Policy::EventType event)
++  AuditEvent Audit::policyEvent(const AuditIdentity& identity, std::shared_ptr<Device> device, Policy::EventType event_type)
+   {
+-    AuditEvent audit_event(identity);
+-    auto& message = audit_event.refMessage();
+-
+-    message += "type=Policy.Device.";
+-    message += Policy::eventTypeToString(event);
+-
+-    message += " target=";
+-    message += Rule::targetToString(device->getTarget());
+-
+-    message += " device='";
+-    message += device->getDeviceRule()->toString();
+-    message += "'";
+-
+-    return audit_event;
++    AuditEvent event(identity, _backend);
++ 
++    event.setKey("type", std::string("Policy.Device.") + Policy::eventTypeToString(event_type));
++    event.setKey("target", Rule::targetToString(device->getTarget()));
++    event.setKey("device.system_name", device->getSystemName());
++    event.setKey("device.rule", device->getDeviceRule()->toString());
++ 
++    return event;
+   }
+ 
+   AuditEvent Audit::policyEvent(const AuditIdentity& identity, std::shared_ptr<Device> device, Rule::Target old_target, Rule::Target new_target)
+   {
+-    AuditEvent audit_event(identity);
+-    auto& message = audit_event.refMessage();
+-
+-    message += "type=Policy.Device.";
+-    message += Policy::eventTypeToString(Policy::EventType::Update);
+-    
+-    message += " target.old=";
+-    message += Rule::targetToString(old_target);
+-
+-    message += " target.new=";
+-    message += Rule::targetToString(new_target);
+-    
+-    message += " device='";
+-    message += device->getDeviceRule()->toString();
+-    message += "'";
+-
+-    return audit_event;
++    AuditEvent event(identity, _backend);
++ 
++    event.setKey("type", std::string("Policy.Device.") + Policy::eventTypeToString(Policy::EventType::Update));
++    event.setKey("target.old", Rule::targetToString(old_target));
++    event.setKey("target.new", Rule::targetToString(new_target));
++    event.setKey("device.system_name", device->getSystemName());
++    event.setKey("device.rule", device->getDeviceRule()->toString());
++ 
++    return event;
+   }
+ 
+-  AuditEvent Audit::deviceEvent(const AuditIdentity& identity, std::shared_ptr<Device> device, DeviceManager::EventType event)
++  AuditEvent Audit::deviceEvent(const AuditIdentity& identity, std::shared_ptr<Device> device, DeviceManager::EventType event_type)
+   {
+-    AuditEvent audit_event(identity);
+-    auto& message = audit_event.refMessage();
+-
+-    message += "type=Device.";
+-    message += DeviceManager::eventTypeToString(event);
+-
+-    message += " device='";
+-    message += device->getDeviceRule()->toString();
+-    message += "'";
+-
+-    return audit_event;
++    AuditEvent event(identity, _backend);
++ 
++    event.setKey("type", std::string("Device.") + DeviceManager::eventTypeToString(event_type));
++    event.setKey("device.system_name", device->getSystemName());
++    event.setKey("device.rule", device->getDeviceRule()->toString());
++ 
++    return event;
+   }
+ 
+   AuditEvent Audit::deviceEvent(const AuditIdentity& identity, std::shared_ptr<Device> new_device, std::shared_ptr<Device> old_device)
+   {
+-    AuditEvent audit_event(identity);
+-    auto& message = audit_event.refMessage();
+-
+-    message += "type=Device.";
+-    message += DeviceManager::eventTypeToString(DeviceManager::EventType::Update);
+-    
+-    message += " device.old='";
+-    message += old_device->getDeviceRule()->toString();
+-    message += "'";
+-
+-    message += " device.new='";
+-    message += new_device->getDeviceRule()->toString();
+-    message += "'";
+-
+-    return audit_event;
++    AuditEvent event(identity, _backend);
++ 
++    event.setKey("type", std::string("Device.") + DeviceManager::eventTypeToString(DeviceManager::EventType::Update));
++    event.setKey("device.system_name", new_device->getSystemName());
++    event.setKey("device.rule.old", old_device->getDeviceRule()->toString());
++    event.setKey("device.rule.new", new_device->getDeviceRule()->toString());
++ 
++    return event;
+   }
+ } /* namespace usbguard */
+diff --git a/src/Library/public/usbguard/Audit.hpp b/src/Library/public/usbguard/Audit.hpp
+index 398d4c2..991a451 100644
+--- a/src/Library/public/usbguard/Audit.hpp
++++ b/src/Library/public/usbguard/Audit.hpp
+@@ -27,6 +27,8 @@
+ 
+ #include <string>
+ #include <memory>
++#include <mutex>
++#include <unordered_map>
+ 
+ #include <unistd.h>
+ #include <sys/types.h>
+@@ -39,16 +41,24 @@ namespace usbguard
+       AuditIdentity();
+       AuditIdentity(uid_t uid, pid_t pid);
+ 
++      uid_t uid() const;
++      pid_t pid() const;
++
+       std::string toString() const;
++
+     private:
+       uid_t _uid;
+       pid_t _pid;
+   };
+ 
++  class AuditBackend;
++
+   class DLL_PUBLIC AuditEvent
+   {
+-      AuditEvent(const AuditIdentity& identity);
++      AuditEvent(const AuditIdentity& identity, std::shared_ptr<AuditBackend>& backend);
+     public:
++      using Keys = std::unordered_map<std::string,std::string>;
++
+       AuditEvent(AuditEvent&& event);
+       AuditEvent(const AuditEvent& event) = delete;
+       ~AuditEvent();
+@@ -56,23 +66,43 @@ namespace usbguard
+       void success();
+       void failure();
+ 
++      const AuditIdentity& identity() const;
++      const Keys& keys() const;
++
+     private:
+-      void confirm(const std::string& result);
+-      void setConfirmed(bool state);
+-      std::string& refMessage();
++      void commit(const std::string& result);
++      void setCommited(bool state);
++      void setKey(const std::string& key, const std::string& value);
+ 
+-      bool _confirmed;
++      bool _commited;
++      
+       AuditIdentity _identity;
+-      std::string _message;
++      std::shared_ptr<AuditBackend> _backend;
++      Keys _keys;
+ 
+       friend class Audit;
+   };
+ 
++  class DLL_PUBLIC AuditBackend
++  {
++    public:
++      AuditBackend();
++      virtual ~AuditBackend();
++      
++      virtual void write(const AuditEvent& event) = 0;
++      void commit(const AuditEvent& event);
++
++    private:
++      std::mutex _mutex;
++  };
++
+   class DLL_PUBLIC Audit
+   {
+     public:
+       Audit(const AuditIdentity& identity);
+ 
++      void setBackend(std::unique_ptr<AuditBackend> backend);
++
+       AuditEvent policyEvent(std::shared_ptr<Rule> rule, Policy::EventType event);
+       AuditEvent policyEvent(std::shared_ptr<Rule> new_rule, std::shared_ptr<Rule> old_rule);
+       AuditEvent policyEvent(std::shared_ptr<Device> device, Policy::EventType event);
+@@ -94,10 +124,10 @@ namespace usbguard
+        *   - what: append, remove, update
+        *   - update: old, new
+        */
+-      static AuditEvent policyEvent(const AuditIdentity& identity, std::shared_ptr<Rule> rule, Policy::EventType event);
+-      static AuditEvent policyEvent(const AuditIdentity& identity, std::shared_ptr<Rule> new_rule, std::shared_ptr<Rule> old_rule);
+-      static AuditEvent policyEvent(const AuditIdentity& identity, std::shared_ptr<Device> device, Policy::EventType event);
+-      static AuditEvent policyEvent(const AuditIdentity& identity, std::shared_ptr<Device> device, Rule::Target old_target, Rule::Target new_target);
++      AuditEvent policyEvent(const AuditIdentity& identity, std::shared_ptr<Rule> rule, Policy::EventType event);
++      AuditEvent policyEvent(const AuditIdentity& identity, std::shared_ptr<Rule> new_rule, std::shared_ptr<Rule> old_rule);
++      AuditEvent policyEvent(const AuditIdentity& identity, std::shared_ptr<Device> device, Policy::EventType event);
++      AuditEvent policyEvent(const AuditIdentity& identity, std::shared_ptr<Device> device, Rule::Target old_target, Rule::Target new_target);
+ 
+       /*
+        * Audit device changes:
+@@ -111,10 +141,11 @@ namespace usbguard
+        *   - what: insert, remove, authorization target
+        *   - change: old, new
+        */
+-      static AuditEvent deviceEvent(const AuditIdentity& identity, std::shared_ptr<Device> device, DeviceManager::EventType event);
+-      static AuditEvent deviceEvent(const AuditIdentity& identity, std::shared_ptr<Device> new_device, std::shared_ptr<Device> old_device);
++      AuditEvent deviceEvent(const AuditIdentity& identity, std::shared_ptr<Device> device, DeviceManager::EventType event);
++      AuditEvent deviceEvent(const AuditIdentity& identity, std::shared_ptr<Device> new_device, std::shared_ptr<Device> old_device);
+ 
+     private:
+       AuditIdentity _identity;
++      std::shared_ptr<AuditBackend> _backend;
+   };
+ } /* namespace usbguard */
+diff --git a/src/Library/public/usbguard/Device.hpp b/src/Library/public/usbguard/Device.hpp
+index d5a8130..f8dbb8d 100644
+--- a/src/Library/public/usbguard/Device.hpp
++++ b/src/Library/public/usbguard/Device.hpp
+@@ -78,6 +78,7 @@ namespace usbguard {
+     const std::vector<USBInterfaceType>& getInterfaceTypes() const;
+ 
+     virtual bool isController() const = 0;
++    virtual std::string getSystemName() const = 0;
+ 
+     void loadDeviceDescriptor(USBDescriptorParser* parser, const USBDescriptor* descriptor);
+     void loadConfigurationDescriptor(USBDescriptorParser* parser, const USBDescriptor* descriptor);
+diff --git a/usbguard-daemon.conf.in b/usbguard-daemon.conf.in
+index 5e39e7b..bb98276 100644
+--- a/usbguard-daemon.conf.in
++++ b/usbguard-daemon.conf.in
+@@ -155,6 +155,18 @@ IPCAccessControlFiles=%sysconfdir%/usbguard/IPCAccessControl.d/
+ DeviceRulesWithPort=false
+ 
+ #
++# USBGuard Audit events log backend
++#
++# One of:
++#
++# * FileAudit - Log audit events into a file specified by
++#               AuditFilePath setting (see below)
++# * LinuxAudit - Log audit events using the Linux Audit
++#                subsystem (using audit_log_user_message)
++#
++AuditBackend=FileAudit
++
++#
+ # USBGuard audit events log file path.
+ #
+-AuditFilePath=%localstatedir%/log/usbguard/usbguard-audit.log
++AuditFilePath=%localstatedir%/log/usbguard/usbguard-audit.log
+\ No newline at end of file
