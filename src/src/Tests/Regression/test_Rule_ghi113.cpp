@@ -16,21 +16,23 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
+#include "usbguard/Rule.hpp"
+
 #include <catch.hpp>
-#include <Rule.hpp>
 
 using namespace usbguard;
 
-TEST_CASE("Regression: GitHub issue #113", "[regression]") {
+TEST_CASE("Regression: GitHub issue #113", "[regression]")
+{
   Rule target_rule;
   Rule source_rule;
-
   const std::string source_rule_spec = \
     "allow with-interface equals { 08:*:* }";
   const std::string target_rule_spec = \
     "allow with-interface equals { 08:06:50 }";
-
   CHECK_NOTHROW(target_rule = Rule::fromString(target_rule_spec));
   CHECK_NOTHROW(source_rule = Rule::fromString(source_rule_spec));
   REQUIRE(source_rule.appliesTo(target_rule));
 }
+
+/* vim: set ts=2 sw=2 et */

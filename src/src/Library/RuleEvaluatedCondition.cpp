@@ -16,18 +16,25 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
 #include "RuleEvaluatedCondition.hpp"
-#include "RuleParser.hpp"
 #include "RulePrivate.hpp"
+
+#include "usbguard/RuleParser.hpp"
+
 #include <string>
+
 #ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE
-#include <ctime>
+  #define _XOPEN_SOURCE
+  #include <ctime>
 #endif
 
 namespace usbguard
 {
-  RuleEvaluatedCondition::RuleEvaluatedCondition(const String& elapsed_time, bool negated)
+  RuleEvaluatedCondition::RuleEvaluatedCondition(const std::string& elapsed_time, bool negated)
     : RuleConditionBase("rule-applied", elapsed_time, negated)
   {
     _elapsed_time = std::chrono::steady_clock::duration(stringToSeconds(elapsed_time));
@@ -47,22 +54,23 @@ namespace usbguard
       }
       else {
         const auto last_evaluated_duration = std::chrono::steady_clock::now() \
-                                              - rule.internal()->metadata().tp_last_evaluated;
+          - rule.internal()->metadata().tp_last_evaluated;
 
         if (last_evaluated_duration <= _elapsed_time) {
           return true;
         }
       }
     }
+
     return false;
   }
 
-  RuleConditionBase * RuleEvaluatedCondition::clone() const
+  RuleConditionBase* RuleEvaluatedCondition::clone() const
   {
     return new RuleEvaluatedCondition(*this);
   }
 
-  uint64_t RuleEvaluatedCondition::stringToSeconds(const String& string)
+  uint64_t RuleEvaluatedCondition::stringToSeconds(const std::string& string)
   {
     struct ::tm tm = { };
 
@@ -82,3 +90,4 @@ namespace usbguard
   }
 } /* namespace usbguard */
 
+/* vim: set ts=2 sw=2 et */

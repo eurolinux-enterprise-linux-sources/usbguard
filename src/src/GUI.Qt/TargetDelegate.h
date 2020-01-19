@@ -16,8 +16,10 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
-#ifndef TARGETDELEGATE_H
-#define TARGETDELEGATE_H
+#pragma once
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
 
 #include <QStyledItemDelegate>
 
@@ -28,10 +30,10 @@ class TargetDelegate : public QStyledItemDelegate
 public:
   TargetDelegate(QObject* parent = 0);
 
-  QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-  void setEditorData(QWidget *editor, const QModelIndex &index) const override;
-  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
-  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+  QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+  void setEditorData(QWidget* editor, const QModelIndex& index) const override;
+  void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
+  void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 };
 
-#endif // TARGETDELEGATE_H
+/* vim: set ts=2 sw=2 et */

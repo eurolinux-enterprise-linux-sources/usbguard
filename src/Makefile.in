@@ -91,7 +91,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@SYSTEMD_SUPPORT_ENABLED_TRUE@am__append_1 = \
+@DOCS_ENABLED_TRUE@am__append_1 = \
+@DOCS_ENABLED_TRUE@	$(man_ROFF_FILES)
+
+@SYSTEMD_SUPPORT_ENABLED_TRUE@am__append_2 = \
 @SYSTEMD_SUPPORT_ENABLED_TRUE@	$(top_builddir)/usbguard.service
 
 sbin_PROGRAMS = usbguard-daemon$(EXEEXT) $(am__EXEEXT_2)
@@ -101,37 +104,37 @@ bin_PROGRAMS = usbguard$(EXEEXT) usbguard-rule-parser$(EXEEXT) \
 #
 # DBus Bridge
 #
-@DBUS_ENABLED_TRUE@am__append_2 = usbguard-dbus
-@DBUS_ENABLED_TRUE@am__append_3 = \
-@DBUS_ENABLED_TRUE@	$(top_builddir)/doc/usbguard-dbus.8
+@DBUS_ENABLED_TRUE@am__append_3 = usbguard-dbus
+@DBUS_ENABLED_TRUE@@DOCS_ENABLED_TRUE@am__append_4 = \
+@DBUS_ENABLED_TRUE@@DOCS_ENABLED_TRUE@	$(top_builddir)/doc/man/usbguard-dbus.8
 
-@DBUS_ENABLED_TRUE@am__append_4 = \
+@DBUS_ENABLED_TRUE@am__append_5 = \
 @DBUS_ENABLED_TRUE@	src/DBus/DBusInterface.xml.cstr \
 @DBUS_ENABLED_TRUE@	src/DBus/org.usbguard.service \
 @DBUS_ENABLED_TRUE@	src/DBus/usbguard-dbus.service
 
-@DBUS_ENABLED_TRUE@am__append_5 = \
+@DBUS_ENABLED_TRUE@am__append_6 = \
 @DBUS_ENABLED_TRUE@	src/DBus/org.usbguard.conf \
 @DBUS_ENABLED_TRUE@	src/DBus/org.usbguard.service.in \
 @DBUS_ENABLED_TRUE@	src/DBus/usbguard-dbus.service.in \
 @DBUS_ENABLED_TRUE@	src/DBus/org.usbguard.policy \
 @DBUS_ENABLED_TRUE@	src/DBus/DBusInterface.xml
 
-@DBUS_ENABLED_TRUE@am__append_6 = \
+@DBUS_ENABLED_TRUE@am__append_7 = \
 @DBUS_ENABLED_TRUE@	$(top_builddir)/src/DBus/org.usbguard.service \
 @DBUS_ENABLED_TRUE@	$(top_builddir)/src/DBus/usbguard-dbus.service \
 @DBUS_ENABLED_TRUE@	$(top_builddir)/src/DBus/DBusInterface.xml.cstr
 
-@GUI_QT_ENABLED_TRUE@am__append_7 = usbguard-applet-qt
-@GUI_QT_ENABLED_TRUE@am__append_8 = \
-@GUI_QT_ENABLED_TRUE@	$(top_builddir)/doc/usbguard-applet-qt.1
+@GUI_QT_ENABLED_TRUE@am__append_8 = usbguard-applet-qt
+@DOCS_ENABLED_TRUE@@GUI_QT_ENABLED_TRUE@am__append_9 = \
+@DOCS_ENABLED_TRUE@@GUI_QT_ENABLED_TRUE@	$(top_builddir)/doc/man/usbguard-applet-qt.1
 
-@GUI_QT_ENABLED_TRUE@am__append_9 = \
+@GUI_QT_ENABLED_TRUE@am__append_10 = \
 @GUI_QT_ENABLED_TRUE@	$(usbguard_applet_qt_UIHEADERS) \
 @GUI_QT_ENABLED_TRUE@	$(usbguard_applet_qt_TRANSLATIONS:.ts=.qm) \
 @GUI_QT_ENABLED_TRUE@	src/GUI.Qt/usbguard.qrc
 
-@GUI_QT_ENABLED_TRUE@am__append_10 = \
+@GUI_QT_ENABLED_TRUE@am__append_11 = \
 @GUI_QT_ENABLED_TRUE@	$(usbguard_applet_qt_UIHEADERS) \
 @GUI_QT_ENABLED_TRUE@	$(usbguard_applet_qt_TRANSLATIONS:.ts=.qm) \
 @GUI_QT_ENABLED_TRUE@	$(top_builddir)/src/GUI.Qt/DeviceDialog.moc.cpp \
@@ -139,6 +142,7 @@ bin_PROGRAMS = usbguard$(EXEEXT) usbguard-rule-parser$(EXEEXT) \
 @GUI_QT_ENABLED_TRUE@	$(top_builddir)/src/GUI.Qt/usbguard.qrc.cpp \
 @GUI_QT_ENABLED_TRUE@	$(top_builddir)/src/GUI.Qt/usbguard.qrc \
 @GUI_QT_ENABLED_TRUE@	$(top_builddir)/src/GUI.Qt/DeviceModel.moc.cpp \
+@GUI_QT_ENABLED_TRUE@	$(top_builddir)/src/GUI.Qt/SessionBlocker.moc.cpp \
 @GUI_QT_ENABLED_TRUE@	$(top_builddir)/src/GUI.Qt/TargetDelegate.moc.cpp
 
 subdir = .
@@ -197,44 +201,47 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libusbguard_la_DEPENDENCIES =
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libusbguard_la_OBJECTS = src/Common/libusbguard_la-Utility.lo \
-	src/Library/libusbguard_la-ConfigFile.lo \
-	src/Library/libusbguard_la-ConfigFilePrivate.lo \
-	src/Library/libusbguard_la-IPCPrivate.lo \
-	src/Library/libusbguard_la-IPCClient.lo \
-	src/Library/libusbguard_la-IPCClientPrivate.lo \
-	src/Library/libusbguard_la-IPCServer.lo \
-	src/Library/libusbguard_la-IPCServerPrivate.lo \
-	src/Library/libusbguard_la-USB.lo \
-	src/Library/libusbguard_la-Rule.lo \
-	src/Library/libusbguard_la-RuleParser.lo \
-	src/Library/libusbguard_la-RulePrivate.lo \
-	src/Library/libusbguard_la-RuleSet.lo \
-	src/Library/libusbguard_la-RuleSetPrivate.lo \
-	src/Library/libusbguard_la-Typedefs.lo \
-	src/Library/libusbguard_la-DeviceManagerHooks.lo \
-	src/Library/libusbguard_la-Device.lo \
-	src/Library/libusbguard_la-DevicePrivate.lo \
-	src/Library/libusbguard_la-DeviceManager.lo \
-	src/Library/libusbguard_la-DeviceManagerPrivate.lo \
-	src/Library/libusbguard_la-Logger.lo \
-	src/Library/libusbguard_la-Init.lo \
-	src/Library/libusbguard_la-RuleCondition.lo \
 	src/Library/libusbguard_la-AllowedMatchesCondition.lo \
+	src/Library/libusbguard_la-Base64.lo \
+	src/Library/libusbguard_la-ConfigFilePrivate.lo \
+	src/Library/libusbguard_la-DeviceManagerPrivate.lo \
+	src/Library/libusbguard_la-DevicePrivate.lo \
 	src/Library/libusbguard_la-FixedStateCondition.lo \
-	src/Library/libusbguard_la-RandomStateCondition.lo \
+	src/Library/libusbguard_la-Hash.lo \
+	src/Library/libusbguard_la-IPCClientPrivate.lo \
+	src/Library/libusbguard_la-IPCPrivate.lo \
+	src/Library/libusbguard_la-IPCServerPrivate.lo \
+	src/Library/libusbguard_la-Init.lo \
+	src/Library/libusbguard_la-KeyValueParser.lo \
 	src/Library/libusbguard_la-LocaltimeCondition.lo \
+	src/Library/libusbguard_la-RandomStateCondition.lo \
 	src/Library/libusbguard_la-RuleAppliedCondition.lo \
 	src/Library/libusbguard_la-RuleEvaluatedCondition.lo \
-	src/Library/libusbguard_la-Utility.lo \
-	src/Library/libusbguard_la-Base64.lo \
-	src/Library/libusbguard_la-Hash.lo \
-	src/Library/libusbguard_la-UEvent.lo \
-	src/Library/libusbguard_la-UEventParser.lo \
-	src/Library/libusbguard_la-UEventDeviceManager.lo \
+	src/Library/libusbguard_la-RulePrivate.lo \
+	src/Library/libusbguard_la-RuleSetPrivate.lo \
 	src/Library/libusbguard_la-SysFSDevice.lo \
-	src/Library/libusbguard_la-USBGuard.lo \
-	src/Library/libusbguard_la-Policy.lo \
-	src/Library/libusbguard_la-Audit.lo
+	src/Library/libusbguard_la-UEvent.lo \
+	src/Library/libusbguard_la-UEventDeviceManager.lo \
+	src/Library/libusbguard_la-UEventParser.lo \
+	src/Library/libusbguard_la-UMockdevDeviceManager.lo \
+	src/Library/libusbguard_la-UMockdevDeviceDefinition.lo \
+	src/Library/libusbguard_la-Utility.lo \
+	src/Library/public/usbguard/libusbguard_la-Audit.lo \
+	src/Library/public/usbguard/libusbguard_la-ConfigFile.lo \
+	src/Library/public/usbguard/libusbguard_la-Device.lo \
+	src/Library/public/usbguard/libusbguard_la-DeviceManager.lo \
+	src/Library/public/usbguard/libusbguard_la-DeviceManagerHooks.lo \
+	src/Library/public/usbguard/libusbguard_la-IPCClient.lo \
+	src/Library/public/usbguard/libusbguard_la-IPCServer.lo \
+	src/Library/public/usbguard/libusbguard_la-Logger.lo \
+	src/Library/public/usbguard/libusbguard_la-Policy.lo \
+	src/Library/public/usbguard/libusbguard_la-Rule.lo \
+	src/Library/public/usbguard/libusbguard_la-RuleCondition.lo \
+	src/Library/public/usbguard/libusbguard_la-RuleParser.lo \
+	src/Library/public/usbguard/libusbguard_la-RuleSet.lo \
+	src/Library/public/usbguard/libusbguard_la-Typedefs.lo \
+	src/Library/public/usbguard/libusbguard_la-USB.lo \
+	src/Library/public/usbguard/libusbguard_la-USBGuard.lo
 nodist_libusbguard_la_OBJECTS =  \
 	src/Library/IPC/libusbguard_la-Message.pb.lo \
 	src/Library/IPC/libusbguard_la-Rule.pb.lo \
@@ -278,6 +285,7 @@ am__objects_1 = src/GUI.Qt/usbguard_applet_qt-main.$(OBJEXT) \
 	src/GUI.Qt/usbguard_applet_qt-DeviceDialog.$(OBJEXT) \
 	src/GUI.Qt/usbguard_applet_qt-MainWindow.$(OBJEXT) \
 	src/GUI.Qt/usbguard_applet_qt-DeviceModel.$(OBJEXT) \
+	src/GUI.Qt/usbguard_applet_qt-SessionBlocker.$(OBJEXT) \
 	src/GUI.Qt/usbguard_applet_qt-TargetDelegate.$(OBJEXT)
 @GUI_QT_ENABLED_TRUE@nodist_usbguard_applet_qt_OBJECTS =  \
 @GUI_QT_ENABLED_TRUE@	$(am__objects_1) \
@@ -285,6 +293,7 @@ am__objects_1 = src/GUI.Qt/usbguard_applet_qt-main.$(OBJEXT) \
 @GUI_QT_ENABLED_TRUE@	src/GUI.Qt/usbguard_applet_qt-MainWindow.moc.$(OBJEXT) \
 @GUI_QT_ENABLED_TRUE@	src/GUI.Qt/usbguard_applet_qt-usbguard.qrc.$(OBJEXT) \
 @GUI_QT_ENABLED_TRUE@	src/GUI.Qt/usbguard_applet_qt-DeviceModel.moc.$(OBJEXT) \
+@GUI_QT_ENABLED_TRUE@	src/GUI.Qt/usbguard_applet_qt-SessionBlocker.moc.$(OBJEXT) \
 @GUI_QT_ENABLED_TRUE@	src/GUI.Qt/usbguard_applet_qt-TargetDelegate.moc.$(OBJEXT)
 usbguard_applet_qt_OBJECTS = $(nodist_usbguard_applet_qt_OBJECTS)
 @GUI_QT_ENABLED_TRUE@usbguard_applet_qt_DEPENDENCIES =  \
@@ -293,7 +302,9 @@ am_usbguard_daemon_OBJECTS =  \
 	src/Daemon/usbguard_daemon-Daemon.$(OBJEXT) \
 	src/Daemon/usbguard_daemon-main.$(OBJEXT) \
 	src/Daemon/usbguard_daemon-Seccomp.$(OBJEXT) \
-	src/Common/usbguard_daemon-Utility.$(OBJEXT)
+	src/Common/usbguard_daemon-Utility.$(OBJEXT) \
+	src/Daemon/usbguard_daemon-FileAuditBackend.$(OBJEXT) \
+	src/Daemon/usbguard_daemon-LinuxAuditBackend.$(OBJEXT)
 usbguard_daemon_OBJECTS = $(am_usbguard_daemon_OBJECTS)
 usbguard_daemon_DEPENDENCIES = $(top_builddir)/libusbguard.la
 am__usbguard_dbus_SOURCES_DIST = src/DBus/gdbus-server.cpp \
@@ -468,6 +479,7 @@ DIST_TARGETS = dist-gzip
 am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \
   | sed 's|^\./|$(prefix)/|' | grep -v '$(infodir)/dir$$'
 distcleancheck_listfiles = find . -type f -print
+A2X = @A2X@
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
 AMTAR = @AMTAR@
@@ -543,7 +555,6 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
-PANDOC = @PANDOC@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
@@ -585,6 +596,8 @@ am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
 atomic_LIBS = @atomic_LIBS@
+audit_CFLAGS = @audit_CFLAGS@
+audit_LIBS = @audit_LIBS@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -652,50 +665,63 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+umockdev_CFLAGS = @umockdev_CFLAGS@
+umockdev_LIBS = @umockdev_LIBS@
 SUBDIRS = src/Tests/
 ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = LICENSE usbguard-daemon.conf.in usbguard.service.in \
-	VERSION CHANGELOG.md $(ROFF_PAGES:.roff=) $(MARKDOWN_PAGES) \
+	VERSION CHANGELOG.md src/astylerc \
+	scripts/usbguard-zsh-completion scripts/modeline.vim \
+	scripts/astyle.sh scripts/reformat-sources.sh \
+	scripts/usb-descriptor-collect.sh $(man_ADOC_FILES) \
 	src/Library/IPC/Devices.proto src/Library/IPC/Exception.proto \
 	src/Library/IPC/Message.proto src/Library/IPC/Policy.proto \
 	src/Library/IPC/Rule.proto src/Library/IPC/Parameter.proto \
-	README.md src/ThirdParty/Catch src/ThirdParty/PEGTL \
-	$(am__append_5) src/GUI.Qt/DeviceDialog.ui \
+	README.adoc src/ThirdParty/Catch src/ThirdParty/PEGTL \
+	$(am__append_6) src/GUI.Qt/DeviceDialog.ui \
 	src/GUI.Qt/MainWindow.ui \
 	src/GUI.Qt/usbguard-applet-qt.desktop.in \
 	$(usbguard_applet_qt_RESOURCES) \
 	$(usbguard_applet_qt_SOURCES_BASE) \
 	$(usbguard_applet_qt_TRANSLATIONS)
-BUILT_SOURCES = src/build-config.h $(ROFF_PAGES) \
-	$(nodist_libusbguard_la_SOURCES) $(am__append_4) \
-	$(am__append_9)
+BUILT_SOURCES = src/build-config.h $(am__append_1) \
+	$(nodist_libusbguard_la_SOURCES) $(am__append_5) \
+	$(am__append_10)
 DISTCLEANFILES = \
 	$(BUILT_SOURCES)
 
-CLEANFILES = $(ROFF_PAGES) $(ROFF_PAGES:.roff=) \
-	$(top_builddir)/usbguard-daemon.conf $(am__append_1) \
-	$(nodist_libusbguard_la_SOURCES) $(am__append_6) \
-	$(am__append_10)
-ROFF_PAGES = \
-	doc/usbguard.1.roff \
-	doc/usbguard-dbus.8.roff \
-	doc/usbguard-applet-qt.1.roff \
-	doc/usbguard-daemon.8.roff \
-	doc/usbguard-daemon.conf.5.roff \
-	doc/usbguard-rules.conf.5.roff
+CLEANFILES = $(man_ROFF_FILES) $(man_ROFF_FILES:.roff=) \
+	$(top_builddir)/usbguard-daemon.conf $(am__append_2) \
+	$(nodist_libusbguard_la_SOURCES) $(am__append_7) \
+	$(am__append_11)
+man_ADOC_FILES = \
+	doc/man/usbguard.1.adoc \
+	doc/man/usbguard-dbus.8.adoc \
+	doc/man/usbguard-applet-qt.1.adoc \
+	doc/man/usbguard-daemon.8.adoc \
+	doc/man/usbguard-daemon.conf.5.adoc \
+	doc/man/usbguard-rules.conf.5.adoc
 
-MARKDOWN_PAGES = $(ROFF_PAGES:.roff=.md)
+man_ROFF_FILES = \
+	$(man_ADOC_FILES:.adoc=.roff)
+
 usbguard_confdir = $(sysconfdir)/usbguard
 distuninstallcheck_listfiles = find . -type f ! -name rules.conf -print
-man8_MANS = $(top_builddir)/doc/usbguard-daemon.8 $(am__append_3)
-man5_MANS = \
-	$(top_builddir)/doc/usbguard-daemon.conf.5 \
-	$(top_builddir)/doc/usbguard-rules.conf.5
+@DOCS_ENABLED_FALSE@man8_MANS = $(am__append_4)
+@DOCS_ENABLED_TRUE@man8_MANS =  \
+@DOCS_ENABLED_TRUE@	$(top_builddir)/doc/man/usbguard-daemon.8 \
+@DOCS_ENABLED_TRUE@	$(am__append_4)
+@DOCS_ENABLED_FALSE@man5_MANS = 
+@DOCS_ENABLED_TRUE@man5_MANS = \
+@DOCS_ENABLED_TRUE@	$(top_builddir)/doc/man/usbguard-daemon.conf.5 \
+@DOCS_ENABLED_TRUE@	$(top_builddir)/doc/man/usbguard-rules.conf.5
 
-man1_MANS = $(top_builddir)/doc/usbguard.1 $(am__append_8)
+@DOCS_ENABLED_FALSE@man1_MANS = $(am__append_9)
+@DOCS_ENABLED_TRUE@man1_MANS = $(top_builddir)/doc/man/usbguard.1 \
+@DOCS_ENABLED_TRUE@	$(am__append_9)
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/src \
-	-I$(top_srcdir)/src/Library
+	-I$(top_srcdir)/src/Library/public
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libusbguard.pc
@@ -706,22 +732,28 @@ libusbguard_la_CPPFLAGS = \
 	-fPIC \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/Library \
+	-I$(top_srcdir)/src/Library/public \
 	-I$(top_builddir)/src/Library/IPC \
+	${BOOST_CPPFLAGS} \
 	@qb_CFLAGS@ \
 	@protobuf_CFLAGS@ \
 	@crypto_CFLAGS@ \
-	@pegtl_CFLAGS@
+	@pegtl_CFLAGS@ \
+	@umockdev_CFLAGS@
 
 libusbguard_la_LDFLAGS = \
 	-no-undefined \
-	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
+	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
+	${BOOST_LDFLAGS}
 
 libusbguard_la_LIBADD = \
 	@qb_LIBS@ \
 	@protobuf_LIBS@ \
 	@crypto_LIBS@ \
 	@pegtl_LIBS@ \
-	@atomic_LIBS@
+	@atomic_LIBS@ \
+	@umockdev_LIBS@ \
+	${BOOST_IOSTREAMS_LIB}
 
 nodist_libusbguard_la_SOURCES = \
 	src/Library/IPC/Message.pb.cc \
@@ -738,116 +770,126 @@ nodist_libusbguard_la_SOURCES = \
 	src/Library/IPC/Parameter.pb.h
 
 libusbguard_la_SOURCES = \
-	src/Common/Thread.hpp \
 	src/Common/ByteOrder.hpp \
-	src/Common/Utility.hpp \
-	src/Common/Utility.cpp \
 	src/Common/FDInputStream.hpp \
-	src/Library/ConfigFile.cpp \
+	src/Common/Thread.hpp \
+	src/Common/Utility.cpp \
+	src/Common/Utility.hpp \
+	src/Library/AllowedMatchesCondition.cpp \
+	src/Library/AllowedMatchesCondition.hpp \
+	src/Library/Base64.cpp \
+	src/Library/Base64.hpp \
 	src/Library/ConfigFilePrivate.cpp \
 	src/Library/ConfigFilePrivate.hpp \
-	src/Library/IPCPrivate.hpp \
-	src/Library/IPCPrivate.cpp \
-	src/Library/IPCClient.cpp \
-	src/Library/IPCClientPrivate.hpp \
-	src/Library/IPCClientPrivate.cpp \
-	src/Library/IPCServer.cpp \
-	src/Library/IPCServerPrivate.hpp \
-	src/Library/IPCServerPrivate.cpp \
-	src/Library/USB.cpp \
-	src/Library/Rule.cpp \
-	src/Library/RuleParser.cpp \
-	src/Library/RuleParser.hpp \
-	src/Library/RuleParser/Grammar.hpp \
-	src/Library/RuleParser/Actions.hpp \
-	src/Library/RulePrivate.cpp \
-	src/Library/RulePrivate.hpp \
-	src/Library/RuleSet.cpp \
-	src/Library/RuleSetPrivate.cpp \
-	src/Library/RuleSetPrivate.hpp \
-	src/Library/Typedefs.cpp \
-	src/Library/DeviceManagerHooks.cpp \
-	src/Library/Device.cpp \
-	src/Library/DevicePrivate.hpp \
-	src/Library/DevicePrivate.cpp \
-	src/Library/DeviceManager.cpp \
-	src/Library/DeviceManagerPrivate.hpp \
 	src/Library/DeviceManagerPrivate.cpp \
-	src/Library/Logger.cpp \
-	src/Library/Init.cpp \
-	src/Library/RuleCondition.hpp \
-	src/Library/RuleCondition.cpp \
-	src/Library/AllowedMatchesCondition.hpp \
-	src/Library/AllowedMatchesCondition.cpp \
-	src/Library/FixedStateCondition.hpp \
+	src/Library/DeviceManagerPrivate.hpp \
+	src/Library/DevicePrivate.cpp \
+	src/Library/DevicePrivate.hpp \
 	src/Library/FixedStateCondition.cpp \
-	src/Library/RandomStateCondition.hpp \
-	src/Library/RandomStateCondition.cpp \
-	src/Library/LocaltimeCondition.hpp \
+	src/Library/FixedStateCondition.hpp \
+	src/Library/Hash.cpp \
+	src/Library/Hash.hpp \
+	src/Library/IPCClientPrivate.cpp \
+	src/Library/IPCClientPrivate.hpp \
+	src/Library/IPCPrivate.cpp \
+	src/Library/IPCPrivate.hpp \
+	src/Library/IPCServerPrivate.cpp \
+	src/Library/IPCServerPrivate.hpp \
+	src/Library/Init.cpp \
+	src/Library/KeyValueParser.cpp \
+	src/Library/KeyValueParser.hpp \
 	src/Library/LocaltimeCondition.cpp \
+	src/Library/LocaltimeCondition.hpp \
+	src/Library/RandomStateCondition.cpp \
+	src/Library/RandomStateCondition.hpp \
 	src/Library/RuleAppliedCondition.cpp \
 	src/Library/RuleAppliedCondition.hpp \
 	src/Library/RuleEvaluatedCondition.cpp \
 	src/Library/RuleEvaluatedCondition.hpp \
-	src/Library/Utility.cpp \
-	src/Library/Base64.cpp \
-	src/Library/Base64.hpp \
-	src/Library/Hash.cpp \
-	src/Library/Hash.hpp \
-	src/Library/UEvent.hpp \
-	src/Library/UEvent.cpp \
-	src/Library/UEventParser.hpp \
-	src/Library/UEventParser.cpp \
-	src/Library/UEventDeviceManager.hpp \
-	src/Library/UEventDeviceManager.cpp \
-	src/Library/SysFSDevice.hpp \
+	src/Library/RuleParser/Actions.hpp \
+	src/Library/RuleParser/Grammar.hpp \
+	src/Library/RulePrivate.cpp \
+	src/Library/RulePrivate.hpp \
+	src/Library/RuleSetPrivate.cpp \
+	src/Library/RuleSetPrivate.hpp \
 	src/Library/SysFSDevice.cpp \
-	src/Library/USBGuard.cpp \
-	src/Library/Policy.cpp \
-	src/Library/Audit.cpp \
-	src/Library/Audit.hpp
+	src/Library/SysFSDevice.hpp \
+	src/Library/UEvent.cpp \
+	src/Library/UEvent.hpp \
+	src/Library/UEventDeviceManager.cpp \
+	src/Library/UEventDeviceManager.hpp \
+	src/Library/UEventParser.cpp \
+	src/Library/UEventParser.hpp \
+	src/Library/UMockdevDeviceManager.cpp \
+	src/Library/UMockdevDeviceManager.hpp \
+	src/Library/UMockdevDeviceDefinition.cpp \
+	src/Library/UMockdevDeviceDefinition.hpp \
+	src/Library/Utility.cpp \
+	src/Library/Utility.hpp \
+	src/Library/public/usbguard/Audit.cpp \
+	src/Library/public/usbguard/Audit.hpp \
+	src/Library/public/usbguard/ConfigFile.cpp \
+	src/Library/public/usbguard/Device.cpp \
+	src/Library/public/usbguard/DeviceManager.cpp \
+	src/Library/public/usbguard/DeviceManagerHooks.cpp \
+	src/Library/public/usbguard/IPCClient.cpp \
+	src/Library/public/usbguard/IPCServer.cpp \
+	src/Library/public/usbguard/Logger.cpp \
+	src/Library/public/usbguard/Policy.cpp \
+	src/Library/public/usbguard/Rule.cpp \
+	src/Library/public/usbguard/RuleCondition.cpp \
+	src/Library/public/usbguard/RuleParser.cpp \
+	src/Library/public/usbguard/RuleParser.hpp \
+	src/Library/public/usbguard/RuleSet.cpp \
+	src/Library/public/usbguard/Typedefs.cpp \
+	src/Library/public/usbguard/USB.cpp \
+	src/Library/public/usbguard/USBGuard.cpp
 
 pkginclude_HEADERS = \
-	src/Library/ConfigFile.hpp \
-	src/Library/Interface.hpp \
-	src/Library/IPCClient.hpp \
-	src/Library/IPCServer.hpp \
-	src/Library/USB.hpp \
-	src/Library/Rule.hpp \
-	src/Library/RuleSet.hpp \
-	src/Library/Typedefs.hpp \
-	src/Library/DeviceManagerHooks.hpp \
-	src/Library/Device.hpp \
-	src/Library/DeviceManager.hpp \
-	src/Library/Logger.hpp \
-	src/Library/Predicates.hpp \
-	src/Library/Utility.hpp \
-	src/Library/Exception.hpp \
-	src/Library/USBGuard.hpp \
-	src/Library/Policy.hpp \
-	src/Library/Audit.hpp
+	src/Library/public/usbguard/Audit.hpp \
+	src/Library/public/usbguard/ConfigFile.hpp \
+	src/Library/public/usbguard/Device.hpp \
+	src/Library/public/usbguard/DeviceManager.hpp \
+	src/Library/public/usbguard/DeviceManagerHooks.hpp \
+	src/Library/public/usbguard/Exception.hpp \
+	src/Library/public/usbguard/IPCClient.hpp \
+	src/Library/public/usbguard/IPCServer.hpp \
+	src/Library/public/usbguard/Interface.hpp \
+	src/Library/public/usbguard/Logger.hpp \
+	src/Library/public/usbguard/Policy.hpp \
+	src/Library/public/usbguard/Predicates.hpp \
+	src/Library/public/usbguard/Rule.hpp \
+	src/Library/public/usbguard/RuleCondition.hpp \
+	src/Library/public/usbguard/RuleSet.hpp \
+	src/Library/public/usbguard/Typedefs.hpp \
+	src/Library/public/usbguard/USB.hpp \
+	src/Library/public/usbguard/USBGuard.hpp
 
 usbguard_daemon_SOURCES = \
 	src/Daemon/Daemon.cpp \
 	src/Daemon/Daemon.hpp \
-	src/Daemon/Exceptions.hpp \
 	src/Daemon/main.cpp \
 	src/Daemon/Seccomp.c \
 	src/Daemon/Seccomp.h \
-	src/Common/CCBQueue.hpp \
 	src/Common/Utility.hpp \
-	src/Common/Utility.cpp
+	src/Common/Utility.cpp \
+	src/Daemon/FileAuditBackend.hpp \
+	src/Daemon/FileAuditBackend.cpp \
+	src/Daemon/LinuxAuditBackend.hpp \
+	src/Daemon/LinuxAuditBackend.cpp
 
 usbguard_daemon_CPPFLAGS = \
 	-fPIE \
 	$(AM_CPPFLAGS) \
 	@seccomp_CFLAGS@ \
-	@libcapng_CFLAGS@
+	@libcapng_CFLAGS@ \
+	@audit_CFLAGS@
 
 usbguard_daemon_LDADD = \
 	$(top_builddir)/libusbguard.la \
 	@seccomp_LIBS@ \
-	@libcapng_LIBS@
+	@libcapng_LIBS@ \
+	@audit_LIBS@
 
 usbguard_SOURCES = \
 	src/CLI/usbguard.cpp \
@@ -946,6 +988,8 @@ usbguard_applet_qt_SOURCES_BASE = \
 	src/GUI.Qt/MainWindow.h \
 	src/GUI.Qt/DeviceModel.cpp \
 	src/GUI.Qt/DeviceModel.h \
+	src/GUI.Qt/SessionBlocker.cpp \
+	src/GUI.Qt/SessionBlocker.h \
 	src/GUI.Qt/TargetDelegate.cpp \
 	src/GUI.Qt/TargetDelegate.h
 
@@ -959,6 +1003,7 @@ usbguard_applet_qt_SOURCES_BASE = \
 @GUI_QT_ENABLED_TRUE@	src/GUI.Qt/MainWindow.moc.cpp \
 @GUI_QT_ENABLED_TRUE@	src/GUI.Qt/usbguard.qrc.cpp \
 @GUI_QT_ENABLED_TRUE@	src/GUI.Qt/DeviceModel.moc.cpp \
+@GUI_QT_ENABLED_TRUE@	src/GUI.Qt/SessionBlocker.moc.cpp \
 @GUI_QT_ENABLED_TRUE@	src/GUI.Qt/TargetDelegate.moc.cpp
 
 @GUI_QT_ENABLED_TRUE@usbguard_applet_qt_LDADD = \
@@ -1078,70 +1123,42 @@ src/Library/$(am__dirstamp):
 src/Library/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/Library/$(DEPDIR)
 	@: > src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-ConfigFile.lo: src/Library/$(am__dirstamp) \
+src/Library/libusbguard_la-AllowedMatchesCondition.lo:  \
+	src/Library/$(am__dirstamp) \
+	src/Library/$(DEPDIR)/$(am__dirstamp)
+src/Library/libusbguard_la-Base64.lo: src/Library/$(am__dirstamp) \
 	src/Library/$(DEPDIR)/$(am__dirstamp)
 src/Library/libusbguard_la-ConfigFilePrivate.lo:  \
-	src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-IPCPrivate.lo: src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-IPCClient.lo: src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-IPCClientPrivate.lo:  \
-	src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-IPCServer.lo: src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-IPCServerPrivate.lo:  \
-	src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-USB.lo: src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-Rule.lo: src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-RuleParser.lo: src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-RulePrivate.lo:  \
-	src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-RuleSet.lo: src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-RuleSetPrivate.lo:  \
-	src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-Typedefs.lo: src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-DeviceManagerHooks.lo:  \
-	src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-Device.lo: src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-DevicePrivate.lo:  \
-	src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-DeviceManager.lo:  \
 	src/Library/$(am__dirstamp) \
 	src/Library/$(DEPDIR)/$(am__dirstamp)
 src/Library/libusbguard_la-DeviceManagerPrivate.lo:  \
 	src/Library/$(am__dirstamp) \
 	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-Logger.lo: src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-Init.lo: src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-RuleCondition.lo:  \
-	src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-AllowedMatchesCondition.lo:  \
+src/Library/libusbguard_la-DevicePrivate.lo:  \
 	src/Library/$(am__dirstamp) \
 	src/Library/$(DEPDIR)/$(am__dirstamp)
 src/Library/libusbguard_la-FixedStateCondition.lo:  \
 	src/Library/$(am__dirstamp) \
 	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-RandomStateCondition.lo:  \
+src/Library/libusbguard_la-Hash.lo: src/Library/$(am__dirstamp) \
+	src/Library/$(DEPDIR)/$(am__dirstamp)
+src/Library/libusbguard_la-IPCClientPrivate.lo:  \
+	src/Library/$(am__dirstamp) \
+	src/Library/$(DEPDIR)/$(am__dirstamp)
+src/Library/libusbguard_la-IPCPrivate.lo: src/Library/$(am__dirstamp) \
+	src/Library/$(DEPDIR)/$(am__dirstamp)
+src/Library/libusbguard_la-IPCServerPrivate.lo:  \
+	src/Library/$(am__dirstamp) \
+	src/Library/$(DEPDIR)/$(am__dirstamp)
+src/Library/libusbguard_la-Init.lo: src/Library/$(am__dirstamp) \
+	src/Library/$(DEPDIR)/$(am__dirstamp)
+src/Library/libusbguard_la-KeyValueParser.lo:  \
 	src/Library/$(am__dirstamp) \
 	src/Library/$(DEPDIR)/$(am__dirstamp)
 src/Library/libusbguard_la-LocaltimeCondition.lo:  \
+	src/Library/$(am__dirstamp) \
+	src/Library/$(DEPDIR)/$(am__dirstamp)
+src/Library/libusbguard_la-RandomStateCondition.lo:  \
 	src/Library/$(am__dirstamp) \
 	src/Library/$(DEPDIR)/$(am__dirstamp)
 src/Library/libusbguard_la-RuleAppliedCondition.lo:  \
@@ -1150,29 +1167,85 @@ src/Library/libusbguard_la-RuleAppliedCondition.lo:  \
 src/Library/libusbguard_la-RuleEvaluatedCondition.lo:  \
 	src/Library/$(am__dirstamp) \
 	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-Utility.lo: src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-Base64.lo: src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-Hash.lo: src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-UEvent.lo: src/Library/$(am__dirstamp) \
-	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-UEventParser.lo:  \
+src/Library/libusbguard_la-RulePrivate.lo:  \
 	src/Library/$(am__dirstamp) \
 	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-UEventDeviceManager.lo:  \
+src/Library/libusbguard_la-RuleSetPrivate.lo:  \
 	src/Library/$(am__dirstamp) \
 	src/Library/$(DEPDIR)/$(am__dirstamp)
 src/Library/libusbguard_la-SysFSDevice.lo:  \
 	src/Library/$(am__dirstamp) \
 	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-USBGuard.lo: src/Library/$(am__dirstamp) \
+src/Library/libusbguard_la-UEvent.lo: src/Library/$(am__dirstamp) \
 	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-Policy.lo: src/Library/$(am__dirstamp) \
+src/Library/libusbguard_la-UEventDeviceManager.lo:  \
+	src/Library/$(am__dirstamp) \
 	src/Library/$(DEPDIR)/$(am__dirstamp)
-src/Library/libusbguard_la-Audit.lo: src/Library/$(am__dirstamp) \
+src/Library/libusbguard_la-UEventParser.lo:  \
+	src/Library/$(am__dirstamp) \
 	src/Library/$(DEPDIR)/$(am__dirstamp)
+src/Library/libusbguard_la-UMockdevDeviceManager.lo:  \
+	src/Library/$(am__dirstamp) \
+	src/Library/$(DEPDIR)/$(am__dirstamp)
+src/Library/libusbguard_la-UMockdevDeviceDefinition.lo:  \
+	src/Library/$(am__dirstamp) \
+	src/Library/$(DEPDIR)/$(am__dirstamp)
+src/Library/libusbguard_la-Utility.lo: src/Library/$(am__dirstamp) \
+	src/Library/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/$(am__dirstamp):
+	@$(MKDIR_P) src/Library/public/usbguard
+	@: > src/Library/public/usbguard/$(am__dirstamp)
+src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/Library/public/usbguard/$(DEPDIR)
+	@: > src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-Audit.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-ConfigFile.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-Device.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-DeviceManager.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-DeviceManagerHooks.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-IPCClient.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-IPCServer.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-Logger.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-Policy.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-Rule.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-RuleCondition.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-RuleParser.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-RuleSet.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-Typedefs.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-USB.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+src/Library/public/usbguard/libusbguard_la-USBGuard.lo:  \
+	src/Library/public/usbguard/$(am__dirstamp) \
+	src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
 src/Library/IPC/$(am__dirstamp):
 	@$(MKDIR_P) src/Library/IPC
 	@: > src/Library/IPC/$(am__dirstamp)
@@ -1360,6 +1433,9 @@ src/GUI.Qt/usbguard_applet_qt-MainWindow.$(OBJEXT):  \
 src/GUI.Qt/usbguard_applet_qt-DeviceModel.$(OBJEXT):  \
 	src/GUI.Qt/$(am__dirstamp) \
 	src/GUI.Qt/$(DEPDIR)/$(am__dirstamp)
+src/GUI.Qt/usbguard_applet_qt-SessionBlocker.$(OBJEXT):  \
+	src/GUI.Qt/$(am__dirstamp) \
+	src/GUI.Qt/$(DEPDIR)/$(am__dirstamp)
 src/GUI.Qt/usbguard_applet_qt-TargetDelegate.$(OBJEXT):  \
 	src/GUI.Qt/$(am__dirstamp) \
 	src/GUI.Qt/$(DEPDIR)/$(am__dirstamp)
@@ -1373,6 +1449,9 @@ src/GUI.Qt/usbguard_applet_qt-usbguard.qrc.$(OBJEXT):  \
 	src/GUI.Qt/$(am__dirstamp) \
 	src/GUI.Qt/$(DEPDIR)/$(am__dirstamp)
 src/GUI.Qt/usbguard_applet_qt-DeviceModel.moc.$(OBJEXT):  \
+	src/GUI.Qt/$(am__dirstamp) \
+	src/GUI.Qt/$(DEPDIR)/$(am__dirstamp)
+src/GUI.Qt/usbguard_applet_qt-SessionBlocker.moc.$(OBJEXT):  \
 	src/GUI.Qt/$(am__dirstamp) \
 	src/GUI.Qt/$(DEPDIR)/$(am__dirstamp)
 src/GUI.Qt/usbguard_applet_qt-TargetDelegate.moc.$(OBJEXT):  \
@@ -1399,6 +1478,12 @@ src/Daemon/usbguard_daemon-Seccomp.$(OBJEXT):  \
 src/Common/usbguard_daemon-Utility.$(OBJEXT):  \
 	src/Common/$(am__dirstamp) \
 	src/Common/$(DEPDIR)/$(am__dirstamp)
+src/Daemon/usbguard_daemon-FileAuditBackend.$(OBJEXT):  \
+	src/Daemon/$(am__dirstamp) \
+	src/Daemon/$(DEPDIR)/$(am__dirstamp)
+src/Daemon/usbguard_daemon-LinuxAuditBackend.$(OBJEXT):  \
+	src/Daemon/$(am__dirstamp) \
+	src/Daemon/$(DEPDIR)/$(am__dirstamp)
 
 usbguard-daemon$(EXEEXT): $(usbguard_daemon_OBJECTS) $(usbguard_daemon_DEPENDENCIES) $(EXTRA_usbguard_daemon_DEPENDENCIES) 
 	@rm -f usbguard-daemon$(EXEEXT)
@@ -1436,6 +1521,8 @@ mostlyclean-compile:
 	-rm -f src/Library/*.lo
 	-rm -f src/Library/IPC/*.$(OBJEXT)
 	-rm -f src/Library/IPC/*.lo
+	-rm -f src/Library/public/usbguard/*.$(OBJEXT)
+	-rm -f src/Library/public/usbguard/*.lo
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -1463,6 +1550,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/DBus/$(DEPDIR)/usbguard_dbus-DBusBridge.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/DBus/$(DEPDIR)/usbguard_dbus-gdbus-server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Daemon/$(DEPDIR)/usbguard_daemon-Daemon.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Daemon/$(DEPDIR)/usbguard_daemon-FileAuditBackend.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Daemon/$(DEPDIR)/usbguard_daemon-LinuxAuditBackend.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Daemon/$(DEPDIR)/usbguard_daemon-Seccomp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Daemon/$(DEPDIR)/usbguard_daemon-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-DeviceDialog.Po@am__quote@
@@ -1471,47 +1560,36 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-DeviceModel.moc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-MainWindow.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-MainWindow.moc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-SessionBlocker.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-SessionBlocker.moc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-TargetDelegate.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-TargetDelegate.moc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-usbguard.qrc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-AllowedMatchesCondition.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-Audit.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-Base64.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-ConfigFile.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-ConfigFilePrivate.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-Device.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-DeviceManager.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-DeviceManagerHooks.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-DeviceManagerPrivate.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-DevicePrivate.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-FixedStateCondition.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-Hash.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-IPCClient.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-IPCClientPrivate.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-IPCPrivate.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-IPCServer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-IPCServerPrivate.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-Init.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-KeyValueParser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-LocaltimeCondition.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-Logger.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-Policy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-RandomStateCondition.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-Rule.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-RuleAppliedCondition.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-RuleCondition.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-RuleEvaluatedCondition.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-RuleParser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-RulePrivate.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-RuleSet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-RuleSetPrivate.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-SysFSDevice.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-Typedefs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-UEvent.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-UEventDeviceManager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-UEventParser.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-USB.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-USBGuard.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-UMockdevDeviceDefinition.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-UMockdevDeviceManager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/$(DEPDIR)/libusbguard_la-Utility.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/IPC/$(DEPDIR)/libusbguard_la-Devices.pb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/IPC/$(DEPDIR)/libusbguard_la-Exception.pb.Plo@am__quote@
@@ -1519,6 +1597,22 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/IPC/$(DEPDIR)/libusbguard_la-Parameter.pb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/IPC/$(DEPDIR)/libusbguard_la-Policy.pb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/Library/IPC/$(DEPDIR)/libusbguard_la-Rule.pb.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Audit.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-ConfigFile.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Device.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-DeviceManager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-DeviceManagerHooks.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-IPCClient.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-IPCServer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Logger.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Policy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Rule.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-RuleCondition.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-RuleParser.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-RuleSet.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Typedefs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-USB.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-USBGuard.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -1589,12 +1683,19 @@ src/Common/libusbguard_la-Utility.lo: src/Common/Utility.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Common/libusbguard_la-Utility.lo `test -f 'src/Common/Utility.cpp' || echo '$(srcdir)/'`src/Common/Utility.cpp
 
-src/Library/libusbguard_la-ConfigFile.lo: src/Library/ConfigFile.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-ConfigFile.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-ConfigFile.Tpo -c -o src/Library/libusbguard_la-ConfigFile.lo `test -f 'src/Library/ConfigFile.cpp' || echo '$(srcdir)/'`src/Library/ConfigFile.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-ConfigFile.Tpo src/Library/$(DEPDIR)/libusbguard_la-ConfigFile.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/ConfigFile.cpp' object='src/Library/libusbguard_la-ConfigFile.lo' libtool=yes @AMDEPBACKSLASH@
+src/Library/libusbguard_la-AllowedMatchesCondition.lo: src/Library/AllowedMatchesCondition.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-AllowedMatchesCondition.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-AllowedMatchesCondition.Tpo -c -o src/Library/libusbguard_la-AllowedMatchesCondition.lo `test -f 'src/Library/AllowedMatchesCondition.cpp' || echo '$(srcdir)/'`src/Library/AllowedMatchesCondition.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-AllowedMatchesCondition.Tpo src/Library/$(DEPDIR)/libusbguard_la-AllowedMatchesCondition.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/AllowedMatchesCondition.cpp' object='src/Library/libusbguard_la-AllowedMatchesCondition.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-ConfigFile.lo `test -f 'src/Library/ConfigFile.cpp' || echo '$(srcdir)/'`src/Library/ConfigFile.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-AllowedMatchesCondition.lo `test -f 'src/Library/AllowedMatchesCondition.cpp' || echo '$(srcdir)/'`src/Library/AllowedMatchesCondition.cpp
+
+src/Library/libusbguard_la-Base64.lo: src/Library/Base64.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-Base64.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-Base64.Tpo -c -o src/Library/libusbguard_la-Base64.lo `test -f 'src/Library/Base64.cpp' || echo '$(srcdir)/'`src/Library/Base64.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-Base64.Tpo src/Library/$(DEPDIR)/libusbguard_la-Base64.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/Base64.cpp' object='src/Library/libusbguard_la-Base64.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-Base64.lo `test -f 'src/Library/Base64.cpp' || echo '$(srcdir)/'`src/Library/Base64.cpp
 
 src/Library/libusbguard_la-ConfigFilePrivate.lo: src/Library/ConfigFilePrivate.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-ConfigFilePrivate.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-ConfigFilePrivate.Tpo -c -o src/Library/libusbguard_la-ConfigFilePrivate.lo `test -f 'src/Library/ConfigFilePrivate.cpp' || echo '$(srcdir)/'`src/Library/ConfigFilePrivate.cpp
@@ -1603,103 +1704,12 @@ src/Library/libusbguard_la-ConfigFilePrivate.lo: src/Library/ConfigFilePrivate.c
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-ConfigFilePrivate.lo `test -f 'src/Library/ConfigFilePrivate.cpp' || echo '$(srcdir)/'`src/Library/ConfigFilePrivate.cpp
 
-src/Library/libusbguard_la-IPCPrivate.lo: src/Library/IPCPrivate.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-IPCPrivate.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-IPCPrivate.Tpo -c -o src/Library/libusbguard_la-IPCPrivate.lo `test -f 'src/Library/IPCPrivate.cpp' || echo '$(srcdir)/'`src/Library/IPCPrivate.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-IPCPrivate.Tpo src/Library/$(DEPDIR)/libusbguard_la-IPCPrivate.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/IPCPrivate.cpp' object='src/Library/libusbguard_la-IPCPrivate.lo' libtool=yes @AMDEPBACKSLASH@
+src/Library/libusbguard_la-DeviceManagerPrivate.lo: src/Library/DeviceManagerPrivate.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-DeviceManagerPrivate.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-DeviceManagerPrivate.Tpo -c -o src/Library/libusbguard_la-DeviceManagerPrivate.lo `test -f 'src/Library/DeviceManagerPrivate.cpp' || echo '$(srcdir)/'`src/Library/DeviceManagerPrivate.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-DeviceManagerPrivate.Tpo src/Library/$(DEPDIR)/libusbguard_la-DeviceManagerPrivate.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/DeviceManagerPrivate.cpp' object='src/Library/libusbguard_la-DeviceManagerPrivate.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-IPCPrivate.lo `test -f 'src/Library/IPCPrivate.cpp' || echo '$(srcdir)/'`src/Library/IPCPrivate.cpp
-
-src/Library/libusbguard_la-IPCClient.lo: src/Library/IPCClient.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-IPCClient.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-IPCClient.Tpo -c -o src/Library/libusbguard_la-IPCClient.lo `test -f 'src/Library/IPCClient.cpp' || echo '$(srcdir)/'`src/Library/IPCClient.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-IPCClient.Tpo src/Library/$(DEPDIR)/libusbguard_la-IPCClient.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/IPCClient.cpp' object='src/Library/libusbguard_la-IPCClient.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-IPCClient.lo `test -f 'src/Library/IPCClient.cpp' || echo '$(srcdir)/'`src/Library/IPCClient.cpp
-
-src/Library/libusbguard_la-IPCClientPrivate.lo: src/Library/IPCClientPrivate.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-IPCClientPrivate.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-IPCClientPrivate.Tpo -c -o src/Library/libusbguard_la-IPCClientPrivate.lo `test -f 'src/Library/IPCClientPrivate.cpp' || echo '$(srcdir)/'`src/Library/IPCClientPrivate.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-IPCClientPrivate.Tpo src/Library/$(DEPDIR)/libusbguard_la-IPCClientPrivate.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/IPCClientPrivate.cpp' object='src/Library/libusbguard_la-IPCClientPrivate.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-IPCClientPrivate.lo `test -f 'src/Library/IPCClientPrivate.cpp' || echo '$(srcdir)/'`src/Library/IPCClientPrivate.cpp
-
-src/Library/libusbguard_la-IPCServer.lo: src/Library/IPCServer.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-IPCServer.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-IPCServer.Tpo -c -o src/Library/libusbguard_la-IPCServer.lo `test -f 'src/Library/IPCServer.cpp' || echo '$(srcdir)/'`src/Library/IPCServer.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-IPCServer.Tpo src/Library/$(DEPDIR)/libusbguard_la-IPCServer.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/IPCServer.cpp' object='src/Library/libusbguard_la-IPCServer.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-IPCServer.lo `test -f 'src/Library/IPCServer.cpp' || echo '$(srcdir)/'`src/Library/IPCServer.cpp
-
-src/Library/libusbguard_la-IPCServerPrivate.lo: src/Library/IPCServerPrivate.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-IPCServerPrivate.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-IPCServerPrivate.Tpo -c -o src/Library/libusbguard_la-IPCServerPrivate.lo `test -f 'src/Library/IPCServerPrivate.cpp' || echo '$(srcdir)/'`src/Library/IPCServerPrivate.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-IPCServerPrivate.Tpo src/Library/$(DEPDIR)/libusbguard_la-IPCServerPrivate.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/IPCServerPrivate.cpp' object='src/Library/libusbguard_la-IPCServerPrivate.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-IPCServerPrivate.lo `test -f 'src/Library/IPCServerPrivate.cpp' || echo '$(srcdir)/'`src/Library/IPCServerPrivate.cpp
-
-src/Library/libusbguard_la-USB.lo: src/Library/USB.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-USB.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-USB.Tpo -c -o src/Library/libusbguard_la-USB.lo `test -f 'src/Library/USB.cpp' || echo '$(srcdir)/'`src/Library/USB.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-USB.Tpo src/Library/$(DEPDIR)/libusbguard_la-USB.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/USB.cpp' object='src/Library/libusbguard_la-USB.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-USB.lo `test -f 'src/Library/USB.cpp' || echo '$(srcdir)/'`src/Library/USB.cpp
-
-src/Library/libusbguard_la-Rule.lo: src/Library/Rule.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-Rule.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-Rule.Tpo -c -o src/Library/libusbguard_la-Rule.lo `test -f 'src/Library/Rule.cpp' || echo '$(srcdir)/'`src/Library/Rule.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-Rule.Tpo src/Library/$(DEPDIR)/libusbguard_la-Rule.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/Rule.cpp' object='src/Library/libusbguard_la-Rule.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-Rule.lo `test -f 'src/Library/Rule.cpp' || echo '$(srcdir)/'`src/Library/Rule.cpp
-
-src/Library/libusbguard_la-RuleParser.lo: src/Library/RuleParser.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-RuleParser.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-RuleParser.Tpo -c -o src/Library/libusbguard_la-RuleParser.lo `test -f 'src/Library/RuleParser.cpp' || echo '$(srcdir)/'`src/Library/RuleParser.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-RuleParser.Tpo src/Library/$(DEPDIR)/libusbguard_la-RuleParser.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/RuleParser.cpp' object='src/Library/libusbguard_la-RuleParser.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-RuleParser.lo `test -f 'src/Library/RuleParser.cpp' || echo '$(srcdir)/'`src/Library/RuleParser.cpp
-
-src/Library/libusbguard_la-RulePrivate.lo: src/Library/RulePrivate.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-RulePrivate.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-RulePrivate.Tpo -c -o src/Library/libusbguard_la-RulePrivate.lo `test -f 'src/Library/RulePrivate.cpp' || echo '$(srcdir)/'`src/Library/RulePrivate.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-RulePrivate.Tpo src/Library/$(DEPDIR)/libusbguard_la-RulePrivate.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/RulePrivate.cpp' object='src/Library/libusbguard_la-RulePrivate.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-RulePrivate.lo `test -f 'src/Library/RulePrivate.cpp' || echo '$(srcdir)/'`src/Library/RulePrivate.cpp
-
-src/Library/libusbguard_la-RuleSet.lo: src/Library/RuleSet.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-RuleSet.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-RuleSet.Tpo -c -o src/Library/libusbguard_la-RuleSet.lo `test -f 'src/Library/RuleSet.cpp' || echo '$(srcdir)/'`src/Library/RuleSet.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-RuleSet.Tpo src/Library/$(DEPDIR)/libusbguard_la-RuleSet.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/RuleSet.cpp' object='src/Library/libusbguard_la-RuleSet.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-RuleSet.lo `test -f 'src/Library/RuleSet.cpp' || echo '$(srcdir)/'`src/Library/RuleSet.cpp
-
-src/Library/libusbguard_la-RuleSetPrivate.lo: src/Library/RuleSetPrivate.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-RuleSetPrivate.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-RuleSetPrivate.Tpo -c -o src/Library/libusbguard_la-RuleSetPrivate.lo `test -f 'src/Library/RuleSetPrivate.cpp' || echo '$(srcdir)/'`src/Library/RuleSetPrivate.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-RuleSetPrivate.Tpo src/Library/$(DEPDIR)/libusbguard_la-RuleSetPrivate.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/RuleSetPrivate.cpp' object='src/Library/libusbguard_la-RuleSetPrivate.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-RuleSetPrivate.lo `test -f 'src/Library/RuleSetPrivate.cpp' || echo '$(srcdir)/'`src/Library/RuleSetPrivate.cpp
-
-src/Library/libusbguard_la-Typedefs.lo: src/Library/Typedefs.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-Typedefs.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-Typedefs.Tpo -c -o src/Library/libusbguard_la-Typedefs.lo `test -f 'src/Library/Typedefs.cpp' || echo '$(srcdir)/'`src/Library/Typedefs.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-Typedefs.Tpo src/Library/$(DEPDIR)/libusbguard_la-Typedefs.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/Typedefs.cpp' object='src/Library/libusbguard_la-Typedefs.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-Typedefs.lo `test -f 'src/Library/Typedefs.cpp' || echo '$(srcdir)/'`src/Library/Typedefs.cpp
-
-src/Library/libusbguard_la-DeviceManagerHooks.lo: src/Library/DeviceManagerHooks.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-DeviceManagerHooks.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-DeviceManagerHooks.Tpo -c -o src/Library/libusbguard_la-DeviceManagerHooks.lo `test -f 'src/Library/DeviceManagerHooks.cpp' || echo '$(srcdir)/'`src/Library/DeviceManagerHooks.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-DeviceManagerHooks.Tpo src/Library/$(DEPDIR)/libusbguard_la-DeviceManagerHooks.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/DeviceManagerHooks.cpp' object='src/Library/libusbguard_la-DeviceManagerHooks.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-DeviceManagerHooks.lo `test -f 'src/Library/DeviceManagerHooks.cpp' || echo '$(srcdir)/'`src/Library/DeviceManagerHooks.cpp
-
-src/Library/libusbguard_la-Device.lo: src/Library/Device.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-Device.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-Device.Tpo -c -o src/Library/libusbguard_la-Device.lo `test -f 'src/Library/Device.cpp' || echo '$(srcdir)/'`src/Library/Device.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-Device.Tpo src/Library/$(DEPDIR)/libusbguard_la-Device.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/Device.cpp' object='src/Library/libusbguard_la-Device.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-Device.lo `test -f 'src/Library/Device.cpp' || echo '$(srcdir)/'`src/Library/Device.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-DeviceManagerPrivate.lo `test -f 'src/Library/DeviceManagerPrivate.cpp' || echo '$(srcdir)/'`src/Library/DeviceManagerPrivate.cpp
 
 src/Library/libusbguard_la-DevicePrivate.lo: src/Library/DevicePrivate.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-DevicePrivate.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-DevicePrivate.Tpo -c -o src/Library/libusbguard_la-DevicePrivate.lo `test -f 'src/Library/DevicePrivate.cpp' || echo '$(srcdir)/'`src/Library/DevicePrivate.cpp
@@ -1708,26 +1718,40 @@ src/Library/libusbguard_la-DevicePrivate.lo: src/Library/DevicePrivate.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-DevicePrivate.lo `test -f 'src/Library/DevicePrivate.cpp' || echo '$(srcdir)/'`src/Library/DevicePrivate.cpp
 
-src/Library/libusbguard_la-DeviceManager.lo: src/Library/DeviceManager.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-DeviceManager.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-DeviceManager.Tpo -c -o src/Library/libusbguard_la-DeviceManager.lo `test -f 'src/Library/DeviceManager.cpp' || echo '$(srcdir)/'`src/Library/DeviceManager.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-DeviceManager.Tpo src/Library/$(DEPDIR)/libusbguard_la-DeviceManager.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/DeviceManager.cpp' object='src/Library/libusbguard_la-DeviceManager.lo' libtool=yes @AMDEPBACKSLASH@
+src/Library/libusbguard_la-FixedStateCondition.lo: src/Library/FixedStateCondition.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-FixedStateCondition.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-FixedStateCondition.Tpo -c -o src/Library/libusbguard_la-FixedStateCondition.lo `test -f 'src/Library/FixedStateCondition.cpp' || echo '$(srcdir)/'`src/Library/FixedStateCondition.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-FixedStateCondition.Tpo src/Library/$(DEPDIR)/libusbguard_la-FixedStateCondition.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/FixedStateCondition.cpp' object='src/Library/libusbguard_la-FixedStateCondition.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-DeviceManager.lo `test -f 'src/Library/DeviceManager.cpp' || echo '$(srcdir)/'`src/Library/DeviceManager.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-FixedStateCondition.lo `test -f 'src/Library/FixedStateCondition.cpp' || echo '$(srcdir)/'`src/Library/FixedStateCondition.cpp
 
-src/Library/libusbguard_la-DeviceManagerPrivate.lo: src/Library/DeviceManagerPrivate.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-DeviceManagerPrivate.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-DeviceManagerPrivate.Tpo -c -o src/Library/libusbguard_la-DeviceManagerPrivate.lo `test -f 'src/Library/DeviceManagerPrivate.cpp' || echo '$(srcdir)/'`src/Library/DeviceManagerPrivate.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-DeviceManagerPrivate.Tpo src/Library/$(DEPDIR)/libusbguard_la-DeviceManagerPrivate.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/DeviceManagerPrivate.cpp' object='src/Library/libusbguard_la-DeviceManagerPrivate.lo' libtool=yes @AMDEPBACKSLASH@
+src/Library/libusbguard_la-Hash.lo: src/Library/Hash.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-Hash.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-Hash.Tpo -c -o src/Library/libusbguard_la-Hash.lo `test -f 'src/Library/Hash.cpp' || echo '$(srcdir)/'`src/Library/Hash.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-Hash.Tpo src/Library/$(DEPDIR)/libusbguard_la-Hash.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/Hash.cpp' object='src/Library/libusbguard_la-Hash.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-DeviceManagerPrivate.lo `test -f 'src/Library/DeviceManagerPrivate.cpp' || echo '$(srcdir)/'`src/Library/DeviceManagerPrivate.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-Hash.lo `test -f 'src/Library/Hash.cpp' || echo '$(srcdir)/'`src/Library/Hash.cpp
 
-src/Library/libusbguard_la-Logger.lo: src/Library/Logger.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-Logger.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-Logger.Tpo -c -o src/Library/libusbguard_la-Logger.lo `test -f 'src/Library/Logger.cpp' || echo '$(srcdir)/'`src/Library/Logger.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-Logger.Tpo src/Library/$(DEPDIR)/libusbguard_la-Logger.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/Logger.cpp' object='src/Library/libusbguard_la-Logger.lo' libtool=yes @AMDEPBACKSLASH@
+src/Library/libusbguard_la-IPCClientPrivate.lo: src/Library/IPCClientPrivate.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-IPCClientPrivate.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-IPCClientPrivate.Tpo -c -o src/Library/libusbguard_la-IPCClientPrivate.lo `test -f 'src/Library/IPCClientPrivate.cpp' || echo '$(srcdir)/'`src/Library/IPCClientPrivate.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-IPCClientPrivate.Tpo src/Library/$(DEPDIR)/libusbguard_la-IPCClientPrivate.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/IPCClientPrivate.cpp' object='src/Library/libusbguard_la-IPCClientPrivate.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-Logger.lo `test -f 'src/Library/Logger.cpp' || echo '$(srcdir)/'`src/Library/Logger.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-IPCClientPrivate.lo `test -f 'src/Library/IPCClientPrivate.cpp' || echo '$(srcdir)/'`src/Library/IPCClientPrivate.cpp
+
+src/Library/libusbguard_la-IPCPrivate.lo: src/Library/IPCPrivate.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-IPCPrivate.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-IPCPrivate.Tpo -c -o src/Library/libusbguard_la-IPCPrivate.lo `test -f 'src/Library/IPCPrivate.cpp' || echo '$(srcdir)/'`src/Library/IPCPrivate.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-IPCPrivate.Tpo src/Library/$(DEPDIR)/libusbguard_la-IPCPrivate.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/IPCPrivate.cpp' object='src/Library/libusbguard_la-IPCPrivate.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-IPCPrivate.lo `test -f 'src/Library/IPCPrivate.cpp' || echo '$(srcdir)/'`src/Library/IPCPrivate.cpp
+
+src/Library/libusbguard_la-IPCServerPrivate.lo: src/Library/IPCServerPrivate.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-IPCServerPrivate.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-IPCServerPrivate.Tpo -c -o src/Library/libusbguard_la-IPCServerPrivate.lo `test -f 'src/Library/IPCServerPrivate.cpp' || echo '$(srcdir)/'`src/Library/IPCServerPrivate.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-IPCServerPrivate.Tpo src/Library/$(DEPDIR)/libusbguard_la-IPCServerPrivate.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/IPCServerPrivate.cpp' object='src/Library/libusbguard_la-IPCServerPrivate.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-IPCServerPrivate.lo `test -f 'src/Library/IPCServerPrivate.cpp' || echo '$(srcdir)/'`src/Library/IPCServerPrivate.cpp
 
 src/Library/libusbguard_la-Init.lo: src/Library/Init.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-Init.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-Init.Tpo -c -o src/Library/libusbguard_la-Init.lo `test -f 'src/Library/Init.cpp' || echo '$(srcdir)/'`src/Library/Init.cpp
@@ -1736,33 +1760,12 @@ src/Library/libusbguard_la-Init.lo: src/Library/Init.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-Init.lo `test -f 'src/Library/Init.cpp' || echo '$(srcdir)/'`src/Library/Init.cpp
 
-src/Library/libusbguard_la-RuleCondition.lo: src/Library/RuleCondition.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-RuleCondition.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-RuleCondition.Tpo -c -o src/Library/libusbguard_la-RuleCondition.lo `test -f 'src/Library/RuleCondition.cpp' || echo '$(srcdir)/'`src/Library/RuleCondition.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-RuleCondition.Tpo src/Library/$(DEPDIR)/libusbguard_la-RuleCondition.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/RuleCondition.cpp' object='src/Library/libusbguard_la-RuleCondition.lo' libtool=yes @AMDEPBACKSLASH@
+src/Library/libusbguard_la-KeyValueParser.lo: src/Library/KeyValueParser.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-KeyValueParser.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-KeyValueParser.Tpo -c -o src/Library/libusbguard_la-KeyValueParser.lo `test -f 'src/Library/KeyValueParser.cpp' || echo '$(srcdir)/'`src/Library/KeyValueParser.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-KeyValueParser.Tpo src/Library/$(DEPDIR)/libusbguard_la-KeyValueParser.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/KeyValueParser.cpp' object='src/Library/libusbguard_la-KeyValueParser.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-RuleCondition.lo `test -f 'src/Library/RuleCondition.cpp' || echo '$(srcdir)/'`src/Library/RuleCondition.cpp
-
-src/Library/libusbguard_la-AllowedMatchesCondition.lo: src/Library/AllowedMatchesCondition.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-AllowedMatchesCondition.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-AllowedMatchesCondition.Tpo -c -o src/Library/libusbguard_la-AllowedMatchesCondition.lo `test -f 'src/Library/AllowedMatchesCondition.cpp' || echo '$(srcdir)/'`src/Library/AllowedMatchesCondition.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-AllowedMatchesCondition.Tpo src/Library/$(DEPDIR)/libusbguard_la-AllowedMatchesCondition.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/AllowedMatchesCondition.cpp' object='src/Library/libusbguard_la-AllowedMatchesCondition.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-AllowedMatchesCondition.lo `test -f 'src/Library/AllowedMatchesCondition.cpp' || echo '$(srcdir)/'`src/Library/AllowedMatchesCondition.cpp
-
-src/Library/libusbguard_la-FixedStateCondition.lo: src/Library/FixedStateCondition.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-FixedStateCondition.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-FixedStateCondition.Tpo -c -o src/Library/libusbguard_la-FixedStateCondition.lo `test -f 'src/Library/FixedStateCondition.cpp' || echo '$(srcdir)/'`src/Library/FixedStateCondition.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-FixedStateCondition.Tpo src/Library/$(DEPDIR)/libusbguard_la-FixedStateCondition.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/FixedStateCondition.cpp' object='src/Library/libusbguard_la-FixedStateCondition.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-FixedStateCondition.lo `test -f 'src/Library/FixedStateCondition.cpp' || echo '$(srcdir)/'`src/Library/FixedStateCondition.cpp
-
-src/Library/libusbguard_la-RandomStateCondition.lo: src/Library/RandomStateCondition.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-RandomStateCondition.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-RandomStateCondition.Tpo -c -o src/Library/libusbguard_la-RandomStateCondition.lo `test -f 'src/Library/RandomStateCondition.cpp' || echo '$(srcdir)/'`src/Library/RandomStateCondition.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-RandomStateCondition.Tpo src/Library/$(DEPDIR)/libusbguard_la-RandomStateCondition.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/RandomStateCondition.cpp' object='src/Library/libusbguard_la-RandomStateCondition.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-RandomStateCondition.lo `test -f 'src/Library/RandomStateCondition.cpp' || echo '$(srcdir)/'`src/Library/RandomStateCondition.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-KeyValueParser.lo `test -f 'src/Library/KeyValueParser.cpp' || echo '$(srcdir)/'`src/Library/KeyValueParser.cpp
 
 src/Library/libusbguard_la-LocaltimeCondition.lo: src/Library/LocaltimeCondition.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-LocaltimeCondition.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-LocaltimeCondition.Tpo -c -o src/Library/libusbguard_la-LocaltimeCondition.lo `test -f 'src/Library/LocaltimeCondition.cpp' || echo '$(srcdir)/'`src/Library/LocaltimeCondition.cpp
@@ -1770,6 +1773,13 @@ src/Library/libusbguard_la-LocaltimeCondition.lo: src/Library/LocaltimeCondition
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/LocaltimeCondition.cpp' object='src/Library/libusbguard_la-LocaltimeCondition.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-LocaltimeCondition.lo `test -f 'src/Library/LocaltimeCondition.cpp' || echo '$(srcdir)/'`src/Library/LocaltimeCondition.cpp
+
+src/Library/libusbguard_la-RandomStateCondition.lo: src/Library/RandomStateCondition.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-RandomStateCondition.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-RandomStateCondition.Tpo -c -o src/Library/libusbguard_la-RandomStateCondition.lo `test -f 'src/Library/RandomStateCondition.cpp' || echo '$(srcdir)/'`src/Library/RandomStateCondition.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-RandomStateCondition.Tpo src/Library/$(DEPDIR)/libusbguard_la-RandomStateCondition.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/RandomStateCondition.cpp' object='src/Library/libusbguard_la-RandomStateCondition.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-RandomStateCondition.lo `test -f 'src/Library/RandomStateCondition.cpp' || echo '$(srcdir)/'`src/Library/RandomStateCondition.cpp
 
 src/Library/libusbguard_la-RuleAppliedCondition.lo: src/Library/RuleAppliedCondition.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-RuleAppliedCondition.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-RuleAppliedCondition.Tpo -c -o src/Library/libusbguard_la-RuleAppliedCondition.lo `test -f 'src/Library/RuleAppliedCondition.cpp' || echo '$(srcdir)/'`src/Library/RuleAppliedCondition.cpp
@@ -1785,47 +1795,19 @@ src/Library/libusbguard_la-RuleEvaluatedCondition.lo: src/Library/RuleEvaluatedC
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-RuleEvaluatedCondition.lo `test -f 'src/Library/RuleEvaluatedCondition.cpp' || echo '$(srcdir)/'`src/Library/RuleEvaluatedCondition.cpp
 
-src/Library/libusbguard_la-Utility.lo: src/Library/Utility.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-Utility.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-Utility.Tpo -c -o src/Library/libusbguard_la-Utility.lo `test -f 'src/Library/Utility.cpp' || echo '$(srcdir)/'`src/Library/Utility.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-Utility.Tpo src/Library/$(DEPDIR)/libusbguard_la-Utility.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/Utility.cpp' object='src/Library/libusbguard_la-Utility.lo' libtool=yes @AMDEPBACKSLASH@
+src/Library/libusbguard_la-RulePrivate.lo: src/Library/RulePrivate.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-RulePrivate.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-RulePrivate.Tpo -c -o src/Library/libusbguard_la-RulePrivate.lo `test -f 'src/Library/RulePrivate.cpp' || echo '$(srcdir)/'`src/Library/RulePrivate.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-RulePrivate.Tpo src/Library/$(DEPDIR)/libusbguard_la-RulePrivate.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/RulePrivate.cpp' object='src/Library/libusbguard_la-RulePrivate.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-Utility.lo `test -f 'src/Library/Utility.cpp' || echo '$(srcdir)/'`src/Library/Utility.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-RulePrivate.lo `test -f 'src/Library/RulePrivate.cpp' || echo '$(srcdir)/'`src/Library/RulePrivate.cpp
 
-src/Library/libusbguard_la-Base64.lo: src/Library/Base64.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-Base64.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-Base64.Tpo -c -o src/Library/libusbguard_la-Base64.lo `test -f 'src/Library/Base64.cpp' || echo '$(srcdir)/'`src/Library/Base64.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-Base64.Tpo src/Library/$(DEPDIR)/libusbguard_la-Base64.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/Base64.cpp' object='src/Library/libusbguard_la-Base64.lo' libtool=yes @AMDEPBACKSLASH@
+src/Library/libusbguard_la-RuleSetPrivate.lo: src/Library/RuleSetPrivate.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-RuleSetPrivate.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-RuleSetPrivate.Tpo -c -o src/Library/libusbguard_la-RuleSetPrivate.lo `test -f 'src/Library/RuleSetPrivate.cpp' || echo '$(srcdir)/'`src/Library/RuleSetPrivate.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-RuleSetPrivate.Tpo src/Library/$(DEPDIR)/libusbguard_la-RuleSetPrivate.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/RuleSetPrivate.cpp' object='src/Library/libusbguard_la-RuleSetPrivate.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-Base64.lo `test -f 'src/Library/Base64.cpp' || echo '$(srcdir)/'`src/Library/Base64.cpp
-
-src/Library/libusbguard_la-Hash.lo: src/Library/Hash.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-Hash.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-Hash.Tpo -c -o src/Library/libusbguard_la-Hash.lo `test -f 'src/Library/Hash.cpp' || echo '$(srcdir)/'`src/Library/Hash.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-Hash.Tpo src/Library/$(DEPDIR)/libusbguard_la-Hash.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/Hash.cpp' object='src/Library/libusbguard_la-Hash.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-Hash.lo `test -f 'src/Library/Hash.cpp' || echo '$(srcdir)/'`src/Library/Hash.cpp
-
-src/Library/libusbguard_la-UEvent.lo: src/Library/UEvent.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-UEvent.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-UEvent.Tpo -c -o src/Library/libusbguard_la-UEvent.lo `test -f 'src/Library/UEvent.cpp' || echo '$(srcdir)/'`src/Library/UEvent.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-UEvent.Tpo src/Library/$(DEPDIR)/libusbguard_la-UEvent.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/UEvent.cpp' object='src/Library/libusbguard_la-UEvent.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-UEvent.lo `test -f 'src/Library/UEvent.cpp' || echo '$(srcdir)/'`src/Library/UEvent.cpp
-
-src/Library/libusbguard_la-UEventParser.lo: src/Library/UEventParser.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-UEventParser.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-UEventParser.Tpo -c -o src/Library/libusbguard_la-UEventParser.lo `test -f 'src/Library/UEventParser.cpp' || echo '$(srcdir)/'`src/Library/UEventParser.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-UEventParser.Tpo src/Library/$(DEPDIR)/libusbguard_la-UEventParser.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/UEventParser.cpp' object='src/Library/libusbguard_la-UEventParser.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-UEventParser.lo `test -f 'src/Library/UEventParser.cpp' || echo '$(srcdir)/'`src/Library/UEventParser.cpp
-
-src/Library/libusbguard_la-UEventDeviceManager.lo: src/Library/UEventDeviceManager.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-UEventDeviceManager.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-UEventDeviceManager.Tpo -c -o src/Library/libusbguard_la-UEventDeviceManager.lo `test -f 'src/Library/UEventDeviceManager.cpp' || echo '$(srcdir)/'`src/Library/UEventDeviceManager.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-UEventDeviceManager.Tpo src/Library/$(DEPDIR)/libusbguard_la-UEventDeviceManager.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/UEventDeviceManager.cpp' object='src/Library/libusbguard_la-UEventDeviceManager.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-UEventDeviceManager.lo `test -f 'src/Library/UEventDeviceManager.cpp' || echo '$(srcdir)/'`src/Library/UEventDeviceManager.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-RuleSetPrivate.lo `test -f 'src/Library/RuleSetPrivate.cpp' || echo '$(srcdir)/'`src/Library/RuleSetPrivate.cpp
 
 src/Library/libusbguard_la-SysFSDevice.lo: src/Library/SysFSDevice.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-SysFSDevice.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-SysFSDevice.Tpo -c -o src/Library/libusbguard_la-SysFSDevice.lo `test -f 'src/Library/SysFSDevice.cpp' || echo '$(srcdir)/'`src/Library/SysFSDevice.cpp
@@ -1834,26 +1816,159 @@ src/Library/libusbguard_la-SysFSDevice.lo: src/Library/SysFSDevice.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-SysFSDevice.lo `test -f 'src/Library/SysFSDevice.cpp' || echo '$(srcdir)/'`src/Library/SysFSDevice.cpp
 
-src/Library/libusbguard_la-USBGuard.lo: src/Library/USBGuard.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-USBGuard.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-USBGuard.Tpo -c -o src/Library/libusbguard_la-USBGuard.lo `test -f 'src/Library/USBGuard.cpp' || echo '$(srcdir)/'`src/Library/USBGuard.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-USBGuard.Tpo src/Library/$(DEPDIR)/libusbguard_la-USBGuard.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/USBGuard.cpp' object='src/Library/libusbguard_la-USBGuard.lo' libtool=yes @AMDEPBACKSLASH@
+src/Library/libusbguard_la-UEvent.lo: src/Library/UEvent.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-UEvent.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-UEvent.Tpo -c -o src/Library/libusbguard_la-UEvent.lo `test -f 'src/Library/UEvent.cpp' || echo '$(srcdir)/'`src/Library/UEvent.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-UEvent.Tpo src/Library/$(DEPDIR)/libusbguard_la-UEvent.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/UEvent.cpp' object='src/Library/libusbguard_la-UEvent.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-USBGuard.lo `test -f 'src/Library/USBGuard.cpp' || echo '$(srcdir)/'`src/Library/USBGuard.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-UEvent.lo `test -f 'src/Library/UEvent.cpp' || echo '$(srcdir)/'`src/Library/UEvent.cpp
 
-src/Library/libusbguard_la-Policy.lo: src/Library/Policy.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-Policy.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-Policy.Tpo -c -o src/Library/libusbguard_la-Policy.lo `test -f 'src/Library/Policy.cpp' || echo '$(srcdir)/'`src/Library/Policy.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-Policy.Tpo src/Library/$(DEPDIR)/libusbguard_la-Policy.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/Policy.cpp' object='src/Library/libusbguard_la-Policy.lo' libtool=yes @AMDEPBACKSLASH@
+src/Library/libusbguard_la-UEventDeviceManager.lo: src/Library/UEventDeviceManager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-UEventDeviceManager.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-UEventDeviceManager.Tpo -c -o src/Library/libusbguard_la-UEventDeviceManager.lo `test -f 'src/Library/UEventDeviceManager.cpp' || echo '$(srcdir)/'`src/Library/UEventDeviceManager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-UEventDeviceManager.Tpo src/Library/$(DEPDIR)/libusbguard_la-UEventDeviceManager.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/UEventDeviceManager.cpp' object='src/Library/libusbguard_la-UEventDeviceManager.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-Policy.lo `test -f 'src/Library/Policy.cpp' || echo '$(srcdir)/'`src/Library/Policy.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-UEventDeviceManager.lo `test -f 'src/Library/UEventDeviceManager.cpp' || echo '$(srcdir)/'`src/Library/UEventDeviceManager.cpp
 
-src/Library/libusbguard_la-Audit.lo: src/Library/Audit.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-Audit.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-Audit.Tpo -c -o src/Library/libusbguard_la-Audit.lo `test -f 'src/Library/Audit.cpp' || echo '$(srcdir)/'`src/Library/Audit.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-Audit.Tpo src/Library/$(DEPDIR)/libusbguard_la-Audit.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/Audit.cpp' object='src/Library/libusbguard_la-Audit.lo' libtool=yes @AMDEPBACKSLASH@
+src/Library/libusbguard_la-UEventParser.lo: src/Library/UEventParser.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-UEventParser.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-UEventParser.Tpo -c -o src/Library/libusbguard_la-UEventParser.lo `test -f 'src/Library/UEventParser.cpp' || echo '$(srcdir)/'`src/Library/UEventParser.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-UEventParser.Tpo src/Library/$(DEPDIR)/libusbguard_la-UEventParser.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/UEventParser.cpp' object='src/Library/libusbguard_la-UEventParser.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-Audit.lo `test -f 'src/Library/Audit.cpp' || echo '$(srcdir)/'`src/Library/Audit.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-UEventParser.lo `test -f 'src/Library/UEventParser.cpp' || echo '$(srcdir)/'`src/Library/UEventParser.cpp
+
+src/Library/libusbguard_la-UMockdevDeviceManager.lo: src/Library/UMockdevDeviceManager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-UMockdevDeviceManager.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-UMockdevDeviceManager.Tpo -c -o src/Library/libusbguard_la-UMockdevDeviceManager.lo `test -f 'src/Library/UMockdevDeviceManager.cpp' || echo '$(srcdir)/'`src/Library/UMockdevDeviceManager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-UMockdevDeviceManager.Tpo src/Library/$(DEPDIR)/libusbguard_la-UMockdevDeviceManager.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/UMockdevDeviceManager.cpp' object='src/Library/libusbguard_la-UMockdevDeviceManager.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-UMockdevDeviceManager.lo `test -f 'src/Library/UMockdevDeviceManager.cpp' || echo '$(srcdir)/'`src/Library/UMockdevDeviceManager.cpp
+
+src/Library/libusbguard_la-UMockdevDeviceDefinition.lo: src/Library/UMockdevDeviceDefinition.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-UMockdevDeviceDefinition.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-UMockdevDeviceDefinition.Tpo -c -o src/Library/libusbguard_la-UMockdevDeviceDefinition.lo `test -f 'src/Library/UMockdevDeviceDefinition.cpp' || echo '$(srcdir)/'`src/Library/UMockdevDeviceDefinition.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-UMockdevDeviceDefinition.Tpo src/Library/$(DEPDIR)/libusbguard_la-UMockdevDeviceDefinition.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/UMockdevDeviceDefinition.cpp' object='src/Library/libusbguard_la-UMockdevDeviceDefinition.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-UMockdevDeviceDefinition.lo `test -f 'src/Library/UMockdevDeviceDefinition.cpp' || echo '$(srcdir)/'`src/Library/UMockdevDeviceDefinition.cpp
+
+src/Library/libusbguard_la-Utility.lo: src/Library/Utility.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/libusbguard_la-Utility.lo -MD -MP -MF src/Library/$(DEPDIR)/libusbguard_la-Utility.Tpo -c -o src/Library/libusbguard_la-Utility.lo `test -f 'src/Library/Utility.cpp' || echo '$(srcdir)/'`src/Library/Utility.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/$(DEPDIR)/libusbguard_la-Utility.Tpo src/Library/$(DEPDIR)/libusbguard_la-Utility.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/Utility.cpp' object='src/Library/libusbguard_la-Utility.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/libusbguard_la-Utility.lo `test -f 'src/Library/Utility.cpp' || echo '$(srcdir)/'`src/Library/Utility.cpp
+
+src/Library/public/usbguard/libusbguard_la-Audit.lo: src/Library/public/usbguard/Audit.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-Audit.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Audit.Tpo -c -o src/Library/public/usbguard/libusbguard_la-Audit.lo `test -f 'src/Library/public/usbguard/Audit.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/Audit.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Audit.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Audit.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/Audit.cpp' object='src/Library/public/usbguard/libusbguard_la-Audit.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-Audit.lo `test -f 'src/Library/public/usbguard/Audit.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/Audit.cpp
+
+src/Library/public/usbguard/libusbguard_la-ConfigFile.lo: src/Library/public/usbguard/ConfigFile.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-ConfigFile.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-ConfigFile.Tpo -c -o src/Library/public/usbguard/libusbguard_la-ConfigFile.lo `test -f 'src/Library/public/usbguard/ConfigFile.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/ConfigFile.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-ConfigFile.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-ConfigFile.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/ConfigFile.cpp' object='src/Library/public/usbguard/libusbguard_la-ConfigFile.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-ConfigFile.lo `test -f 'src/Library/public/usbguard/ConfigFile.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/ConfigFile.cpp
+
+src/Library/public/usbguard/libusbguard_la-Device.lo: src/Library/public/usbguard/Device.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-Device.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Device.Tpo -c -o src/Library/public/usbguard/libusbguard_la-Device.lo `test -f 'src/Library/public/usbguard/Device.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/Device.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Device.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Device.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/Device.cpp' object='src/Library/public/usbguard/libusbguard_la-Device.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-Device.lo `test -f 'src/Library/public/usbguard/Device.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/Device.cpp
+
+src/Library/public/usbguard/libusbguard_la-DeviceManager.lo: src/Library/public/usbguard/DeviceManager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-DeviceManager.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-DeviceManager.Tpo -c -o src/Library/public/usbguard/libusbguard_la-DeviceManager.lo `test -f 'src/Library/public/usbguard/DeviceManager.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/DeviceManager.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-DeviceManager.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-DeviceManager.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/DeviceManager.cpp' object='src/Library/public/usbguard/libusbguard_la-DeviceManager.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-DeviceManager.lo `test -f 'src/Library/public/usbguard/DeviceManager.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/DeviceManager.cpp
+
+src/Library/public/usbguard/libusbguard_la-DeviceManagerHooks.lo: src/Library/public/usbguard/DeviceManagerHooks.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-DeviceManagerHooks.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-DeviceManagerHooks.Tpo -c -o src/Library/public/usbguard/libusbguard_la-DeviceManagerHooks.lo `test -f 'src/Library/public/usbguard/DeviceManagerHooks.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/DeviceManagerHooks.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-DeviceManagerHooks.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-DeviceManagerHooks.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/DeviceManagerHooks.cpp' object='src/Library/public/usbguard/libusbguard_la-DeviceManagerHooks.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-DeviceManagerHooks.lo `test -f 'src/Library/public/usbguard/DeviceManagerHooks.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/DeviceManagerHooks.cpp
+
+src/Library/public/usbguard/libusbguard_la-IPCClient.lo: src/Library/public/usbguard/IPCClient.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-IPCClient.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-IPCClient.Tpo -c -o src/Library/public/usbguard/libusbguard_la-IPCClient.lo `test -f 'src/Library/public/usbguard/IPCClient.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/IPCClient.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-IPCClient.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-IPCClient.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/IPCClient.cpp' object='src/Library/public/usbguard/libusbguard_la-IPCClient.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-IPCClient.lo `test -f 'src/Library/public/usbguard/IPCClient.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/IPCClient.cpp
+
+src/Library/public/usbguard/libusbguard_la-IPCServer.lo: src/Library/public/usbguard/IPCServer.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-IPCServer.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-IPCServer.Tpo -c -o src/Library/public/usbguard/libusbguard_la-IPCServer.lo `test -f 'src/Library/public/usbguard/IPCServer.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/IPCServer.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-IPCServer.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-IPCServer.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/IPCServer.cpp' object='src/Library/public/usbguard/libusbguard_la-IPCServer.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-IPCServer.lo `test -f 'src/Library/public/usbguard/IPCServer.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/IPCServer.cpp
+
+src/Library/public/usbguard/libusbguard_la-Logger.lo: src/Library/public/usbguard/Logger.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-Logger.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Logger.Tpo -c -o src/Library/public/usbguard/libusbguard_la-Logger.lo `test -f 'src/Library/public/usbguard/Logger.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/Logger.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Logger.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Logger.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/Logger.cpp' object='src/Library/public/usbguard/libusbguard_la-Logger.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-Logger.lo `test -f 'src/Library/public/usbguard/Logger.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/Logger.cpp
+
+src/Library/public/usbguard/libusbguard_la-Policy.lo: src/Library/public/usbguard/Policy.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-Policy.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Policy.Tpo -c -o src/Library/public/usbguard/libusbguard_la-Policy.lo `test -f 'src/Library/public/usbguard/Policy.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/Policy.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Policy.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Policy.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/Policy.cpp' object='src/Library/public/usbguard/libusbguard_la-Policy.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-Policy.lo `test -f 'src/Library/public/usbguard/Policy.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/Policy.cpp
+
+src/Library/public/usbguard/libusbguard_la-Rule.lo: src/Library/public/usbguard/Rule.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-Rule.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Rule.Tpo -c -o src/Library/public/usbguard/libusbguard_la-Rule.lo `test -f 'src/Library/public/usbguard/Rule.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/Rule.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Rule.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Rule.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/Rule.cpp' object='src/Library/public/usbguard/libusbguard_la-Rule.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-Rule.lo `test -f 'src/Library/public/usbguard/Rule.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/Rule.cpp
+
+src/Library/public/usbguard/libusbguard_la-RuleCondition.lo: src/Library/public/usbguard/RuleCondition.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-RuleCondition.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-RuleCondition.Tpo -c -o src/Library/public/usbguard/libusbguard_la-RuleCondition.lo `test -f 'src/Library/public/usbguard/RuleCondition.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/RuleCondition.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-RuleCondition.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-RuleCondition.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/RuleCondition.cpp' object='src/Library/public/usbguard/libusbguard_la-RuleCondition.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-RuleCondition.lo `test -f 'src/Library/public/usbguard/RuleCondition.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/RuleCondition.cpp
+
+src/Library/public/usbguard/libusbguard_la-RuleParser.lo: src/Library/public/usbguard/RuleParser.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-RuleParser.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-RuleParser.Tpo -c -o src/Library/public/usbguard/libusbguard_la-RuleParser.lo `test -f 'src/Library/public/usbguard/RuleParser.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/RuleParser.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-RuleParser.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-RuleParser.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/RuleParser.cpp' object='src/Library/public/usbguard/libusbguard_la-RuleParser.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-RuleParser.lo `test -f 'src/Library/public/usbguard/RuleParser.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/RuleParser.cpp
+
+src/Library/public/usbguard/libusbguard_la-RuleSet.lo: src/Library/public/usbguard/RuleSet.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-RuleSet.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-RuleSet.Tpo -c -o src/Library/public/usbguard/libusbguard_la-RuleSet.lo `test -f 'src/Library/public/usbguard/RuleSet.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/RuleSet.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-RuleSet.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-RuleSet.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/RuleSet.cpp' object='src/Library/public/usbguard/libusbguard_la-RuleSet.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-RuleSet.lo `test -f 'src/Library/public/usbguard/RuleSet.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/RuleSet.cpp
+
+src/Library/public/usbguard/libusbguard_la-Typedefs.lo: src/Library/public/usbguard/Typedefs.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-Typedefs.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Typedefs.Tpo -c -o src/Library/public/usbguard/libusbguard_la-Typedefs.lo `test -f 'src/Library/public/usbguard/Typedefs.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/Typedefs.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Typedefs.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-Typedefs.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/Typedefs.cpp' object='src/Library/public/usbguard/libusbguard_la-Typedefs.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-Typedefs.lo `test -f 'src/Library/public/usbguard/Typedefs.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/Typedefs.cpp
+
+src/Library/public/usbguard/libusbguard_la-USB.lo: src/Library/public/usbguard/USB.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-USB.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-USB.Tpo -c -o src/Library/public/usbguard/libusbguard_la-USB.lo `test -f 'src/Library/public/usbguard/USB.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/USB.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-USB.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-USB.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/USB.cpp' object='src/Library/public/usbguard/libusbguard_la-USB.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-USB.lo `test -f 'src/Library/public/usbguard/USB.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/USB.cpp
+
+src/Library/public/usbguard/libusbguard_la-USBGuard.lo: src/Library/public/usbguard/USBGuard.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/public/usbguard/libusbguard_la-USBGuard.lo -MD -MP -MF src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-USBGuard.Tpo -c -o src/Library/public/usbguard/libusbguard_la-USBGuard.lo `test -f 'src/Library/public/usbguard/USBGuard.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/USBGuard.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-USBGuard.Tpo src/Library/public/usbguard/$(DEPDIR)/libusbguard_la-USBGuard.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Library/public/usbguard/USBGuard.cpp' object='src/Library/public/usbguard/libusbguard_la-USBGuard.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Library/public/usbguard/libusbguard_la-USBGuard.lo `test -f 'src/Library/public/usbguard/USBGuard.cpp' || echo '$(srcdir)/'`src/Library/public/usbguard/USBGuard.cpp
 
 src/Library/IPC/libusbguard_la-Message.pb.lo: src/Library/IPC/Message.pb.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libusbguard_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Library/IPC/libusbguard_la-Message.pb.lo -MD -MP -MF src/Library/IPC/$(DEPDIR)/libusbguard_la-Message.pb.Tpo -c -o src/Library/IPC/libusbguard_la-Message.pb.lo `test -f 'src/Library/IPC/Message.pb.cc' || echo '$(srcdir)/'`src/Library/IPC/Message.pb.cc
@@ -2191,6 +2306,20 @@ src/GUI.Qt/usbguard_applet_qt-DeviceModel.obj: src/GUI.Qt/DeviceModel.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_applet_qt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI.Qt/usbguard_applet_qt-DeviceModel.obj `if test -f 'src/GUI.Qt/DeviceModel.cpp'; then $(CYGPATH_W) 'src/GUI.Qt/DeviceModel.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI.Qt/DeviceModel.cpp'; fi`
 
+src/GUI.Qt/usbguard_applet_qt-SessionBlocker.o: src/GUI.Qt/SessionBlocker.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_applet_qt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/GUI.Qt/usbguard_applet_qt-SessionBlocker.o -MD -MP -MF src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-SessionBlocker.Tpo -c -o src/GUI.Qt/usbguard_applet_qt-SessionBlocker.o `test -f 'src/GUI.Qt/SessionBlocker.cpp' || echo '$(srcdir)/'`src/GUI.Qt/SessionBlocker.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-SessionBlocker.Tpo src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-SessionBlocker.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI.Qt/SessionBlocker.cpp' object='src/GUI.Qt/usbguard_applet_qt-SessionBlocker.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_applet_qt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI.Qt/usbguard_applet_qt-SessionBlocker.o `test -f 'src/GUI.Qt/SessionBlocker.cpp' || echo '$(srcdir)/'`src/GUI.Qt/SessionBlocker.cpp
+
+src/GUI.Qt/usbguard_applet_qt-SessionBlocker.obj: src/GUI.Qt/SessionBlocker.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_applet_qt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/GUI.Qt/usbguard_applet_qt-SessionBlocker.obj -MD -MP -MF src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-SessionBlocker.Tpo -c -o src/GUI.Qt/usbguard_applet_qt-SessionBlocker.obj `if test -f 'src/GUI.Qt/SessionBlocker.cpp'; then $(CYGPATH_W) 'src/GUI.Qt/SessionBlocker.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI.Qt/SessionBlocker.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-SessionBlocker.Tpo src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-SessionBlocker.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI.Qt/SessionBlocker.cpp' object='src/GUI.Qt/usbguard_applet_qt-SessionBlocker.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_applet_qt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI.Qt/usbguard_applet_qt-SessionBlocker.obj `if test -f 'src/GUI.Qt/SessionBlocker.cpp'; then $(CYGPATH_W) 'src/GUI.Qt/SessionBlocker.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI.Qt/SessionBlocker.cpp'; fi`
+
 src/GUI.Qt/usbguard_applet_qt-TargetDelegate.o: src/GUI.Qt/TargetDelegate.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_applet_qt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/GUI.Qt/usbguard_applet_qt-TargetDelegate.o -MD -MP -MF src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-TargetDelegate.Tpo -c -o src/GUI.Qt/usbguard_applet_qt-TargetDelegate.o `test -f 'src/GUI.Qt/TargetDelegate.cpp' || echo '$(srcdir)/'`src/GUI.Qt/TargetDelegate.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-TargetDelegate.Tpo src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-TargetDelegate.Po
@@ -2261,6 +2390,20 @@ src/GUI.Qt/usbguard_applet_qt-DeviceModel.moc.obj: src/GUI.Qt/DeviceModel.moc.cp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_applet_qt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI.Qt/usbguard_applet_qt-DeviceModel.moc.obj `if test -f 'src/GUI.Qt/DeviceModel.moc.cpp'; then $(CYGPATH_W) 'src/GUI.Qt/DeviceModel.moc.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI.Qt/DeviceModel.moc.cpp'; fi`
 
+src/GUI.Qt/usbguard_applet_qt-SessionBlocker.moc.o: src/GUI.Qt/SessionBlocker.moc.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_applet_qt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/GUI.Qt/usbguard_applet_qt-SessionBlocker.moc.o -MD -MP -MF src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-SessionBlocker.moc.Tpo -c -o src/GUI.Qt/usbguard_applet_qt-SessionBlocker.moc.o `test -f 'src/GUI.Qt/SessionBlocker.moc.cpp' || echo '$(srcdir)/'`src/GUI.Qt/SessionBlocker.moc.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-SessionBlocker.moc.Tpo src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-SessionBlocker.moc.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI.Qt/SessionBlocker.moc.cpp' object='src/GUI.Qt/usbguard_applet_qt-SessionBlocker.moc.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_applet_qt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI.Qt/usbguard_applet_qt-SessionBlocker.moc.o `test -f 'src/GUI.Qt/SessionBlocker.moc.cpp' || echo '$(srcdir)/'`src/GUI.Qt/SessionBlocker.moc.cpp
+
+src/GUI.Qt/usbguard_applet_qt-SessionBlocker.moc.obj: src/GUI.Qt/SessionBlocker.moc.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_applet_qt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/GUI.Qt/usbguard_applet_qt-SessionBlocker.moc.obj -MD -MP -MF src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-SessionBlocker.moc.Tpo -c -o src/GUI.Qt/usbguard_applet_qt-SessionBlocker.moc.obj `if test -f 'src/GUI.Qt/SessionBlocker.moc.cpp'; then $(CYGPATH_W) 'src/GUI.Qt/SessionBlocker.moc.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI.Qt/SessionBlocker.moc.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-SessionBlocker.moc.Tpo src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-SessionBlocker.moc.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/GUI.Qt/SessionBlocker.moc.cpp' object='src/GUI.Qt/usbguard_applet_qt-SessionBlocker.moc.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_applet_qt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/GUI.Qt/usbguard_applet_qt-SessionBlocker.moc.obj `if test -f 'src/GUI.Qt/SessionBlocker.moc.cpp'; then $(CYGPATH_W) 'src/GUI.Qt/SessionBlocker.moc.cpp'; else $(CYGPATH_W) '$(srcdir)/src/GUI.Qt/SessionBlocker.moc.cpp'; fi`
+
 src/GUI.Qt/usbguard_applet_qt-TargetDelegate.moc.o: src/GUI.Qt/TargetDelegate.moc.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_applet_qt_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/GUI.Qt/usbguard_applet_qt-TargetDelegate.moc.o -MD -MP -MF src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-TargetDelegate.moc.Tpo -c -o src/GUI.Qt/usbguard_applet_qt-TargetDelegate.moc.o `test -f 'src/GUI.Qt/TargetDelegate.moc.cpp' || echo '$(srcdir)/'`src/GUI.Qt/TargetDelegate.moc.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-TargetDelegate.moc.Tpo src/GUI.Qt/$(DEPDIR)/usbguard_applet_qt-TargetDelegate.moc.Po
@@ -2316,6 +2459,34 @@ src/Common/usbguard_daemon-Utility.obj: src/Common/Utility.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Common/Utility.cpp' object='src/Common/usbguard_daemon-Utility.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_daemon_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Common/usbguard_daemon-Utility.obj `if test -f 'src/Common/Utility.cpp'; then $(CYGPATH_W) 'src/Common/Utility.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Common/Utility.cpp'; fi`
+
+src/Daemon/usbguard_daemon-FileAuditBackend.o: src/Daemon/FileAuditBackend.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_daemon_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Daemon/usbguard_daemon-FileAuditBackend.o -MD -MP -MF src/Daemon/$(DEPDIR)/usbguard_daemon-FileAuditBackend.Tpo -c -o src/Daemon/usbguard_daemon-FileAuditBackend.o `test -f 'src/Daemon/FileAuditBackend.cpp' || echo '$(srcdir)/'`src/Daemon/FileAuditBackend.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Daemon/$(DEPDIR)/usbguard_daemon-FileAuditBackend.Tpo src/Daemon/$(DEPDIR)/usbguard_daemon-FileAuditBackend.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Daemon/FileAuditBackend.cpp' object='src/Daemon/usbguard_daemon-FileAuditBackend.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_daemon_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Daemon/usbguard_daemon-FileAuditBackend.o `test -f 'src/Daemon/FileAuditBackend.cpp' || echo '$(srcdir)/'`src/Daemon/FileAuditBackend.cpp
+
+src/Daemon/usbguard_daemon-FileAuditBackend.obj: src/Daemon/FileAuditBackend.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_daemon_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Daemon/usbguard_daemon-FileAuditBackend.obj -MD -MP -MF src/Daemon/$(DEPDIR)/usbguard_daemon-FileAuditBackend.Tpo -c -o src/Daemon/usbguard_daemon-FileAuditBackend.obj `if test -f 'src/Daemon/FileAuditBackend.cpp'; then $(CYGPATH_W) 'src/Daemon/FileAuditBackend.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Daemon/FileAuditBackend.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Daemon/$(DEPDIR)/usbguard_daemon-FileAuditBackend.Tpo src/Daemon/$(DEPDIR)/usbguard_daemon-FileAuditBackend.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Daemon/FileAuditBackend.cpp' object='src/Daemon/usbguard_daemon-FileAuditBackend.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_daemon_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Daemon/usbguard_daemon-FileAuditBackend.obj `if test -f 'src/Daemon/FileAuditBackend.cpp'; then $(CYGPATH_W) 'src/Daemon/FileAuditBackend.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Daemon/FileAuditBackend.cpp'; fi`
+
+src/Daemon/usbguard_daemon-LinuxAuditBackend.o: src/Daemon/LinuxAuditBackend.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_daemon_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Daemon/usbguard_daemon-LinuxAuditBackend.o -MD -MP -MF src/Daemon/$(DEPDIR)/usbguard_daemon-LinuxAuditBackend.Tpo -c -o src/Daemon/usbguard_daemon-LinuxAuditBackend.o `test -f 'src/Daemon/LinuxAuditBackend.cpp' || echo '$(srcdir)/'`src/Daemon/LinuxAuditBackend.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Daemon/$(DEPDIR)/usbguard_daemon-LinuxAuditBackend.Tpo src/Daemon/$(DEPDIR)/usbguard_daemon-LinuxAuditBackend.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Daemon/LinuxAuditBackend.cpp' object='src/Daemon/usbguard_daemon-LinuxAuditBackend.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_daemon_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Daemon/usbguard_daemon-LinuxAuditBackend.o `test -f 'src/Daemon/LinuxAuditBackend.cpp' || echo '$(srcdir)/'`src/Daemon/LinuxAuditBackend.cpp
+
+src/Daemon/usbguard_daemon-LinuxAuditBackend.obj: src/Daemon/LinuxAuditBackend.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_daemon_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/Daemon/usbguard_daemon-LinuxAuditBackend.obj -MD -MP -MF src/Daemon/$(DEPDIR)/usbguard_daemon-LinuxAuditBackend.Tpo -c -o src/Daemon/usbguard_daemon-LinuxAuditBackend.obj `if test -f 'src/Daemon/LinuxAuditBackend.cpp'; then $(CYGPATH_W) 'src/Daemon/LinuxAuditBackend.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Daemon/LinuxAuditBackend.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) src/Daemon/$(DEPDIR)/usbguard_daemon-LinuxAuditBackend.Tpo src/Daemon/$(DEPDIR)/usbguard_daemon-LinuxAuditBackend.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='src/Daemon/LinuxAuditBackend.cpp' object='src/Daemon/usbguard_daemon-LinuxAuditBackend.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_daemon_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o src/Daemon/usbguard_daemon-LinuxAuditBackend.obj `if test -f 'src/Daemon/LinuxAuditBackend.cpp'; then $(CYGPATH_W) 'src/Daemon/LinuxAuditBackend.cpp'; else $(CYGPATH_W) '$(srcdir)/src/Daemon/LinuxAuditBackend.cpp'; fi`
 
 src/DBus/usbguard_dbus-gdbus-server.o: src/DBus/gdbus-server.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(usbguard_dbus_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT src/DBus/usbguard_dbus-gdbus-server.o -MD -MP -MF src/DBus/$(DEPDIR)/usbguard_dbus-gdbus-server.Tpo -c -o src/DBus/usbguard_dbus-gdbus-server.o `test -f 'src/DBus/gdbus-server.cpp' || echo '$(srcdir)/'`src/DBus/gdbus-server.cpp
@@ -2391,6 +2562,7 @@ clean-libtool:
 	-rm -rf src/Common/.libs src/Common/_libs
 	-rm -rf src/Library/.libs src/Library/_libs
 	-rm -rf src/Library/IPC/.libs src/Library/IPC/_libs
+	-rm -rf src/Library/public/usbguard/.libs src/Library/public/usbguard/_libs
 
 distclean-libtool:
 	-rm -f libtool config.lt
@@ -2918,7 +3090,6 @@ distcleancheck: distclean
 	       $(distcleancheck_listfiles) ; \
 	       exit 1; } >&2
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-recursive
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(MANS) $(DATA) $(HEADERS)
@@ -2971,6 +3142,8 @@ distclean-generic:
 	-rm -f src/Library/$(am__dirstamp)
 	-rm -f src/Library/IPC/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/Library/IPC/$(am__dirstamp)
+	-rm -f src/Library/public/usbguard/$(DEPDIR)/$(am__dirstamp)
+	-rm -f src/Library/public/usbguard/$(am__dirstamp)
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
@@ -2984,7 +3157,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf src/CLI/$(DEPDIR) src/Common/$(DEPDIR) src/DBus/$(DEPDIR) src/Daemon/$(DEPDIR) src/GUI.Qt/$(DEPDIR) src/Library/$(DEPDIR) src/Library/IPC/$(DEPDIR)
+	-rm -rf src/CLI/$(DEPDIR) src/Common/$(DEPDIR) src/DBus/$(DEPDIR) src/Daemon/$(DEPDIR) src/GUI.Qt/$(DEPDIR) src/Library/$(DEPDIR) src/Library/IPC/$(DEPDIR) src/Library/public/usbguard/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-libtool distclean-tags
@@ -3036,7 +3209,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf src/CLI/$(DEPDIR) src/Common/$(DEPDIR) src/DBus/$(DEPDIR) src/Daemon/$(DEPDIR) src/GUI.Qt/$(DEPDIR) src/Library/$(DEPDIR) src/Library/IPC/$(DEPDIR)
+	-rm -rf src/CLI/$(DEPDIR) src/Common/$(DEPDIR) src/DBus/$(DEPDIR) src/Daemon/$(DEPDIR) src/GUI.Qt/$(DEPDIR) src/Library/$(DEPDIR) src/Library/IPC/$(DEPDIR) src/Library/public/usbguard/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -3061,11 +3234,11 @@ uninstall-am: uninstall-appiconDATA uninstall-binPROGRAMS \
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 uninstall-man: uninstall-man1 uninstall-man5 uninstall-man8
 
-.MAKE: $(am__recursive_targets) all check check-am install install-am \
+.MAKE: $(am__recursive_targets) all check install install-am \
 	install-data-am install-strip uninstall-am
 
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am \
-	am--refresh check check-am check-local clean clean-binPROGRAMS \
+	am--refresh check check-am clean clean-binPROGRAMS \
 	clean-cscope clean-generic clean-libLTLIBRARIES clean-libtool \
 	clean-sbinPROGRAMS cscope cscopelist-am ctags ctags-am dist \
 	dist-all dist-bzip2 dist-gzip dist-lzip dist-shar dist-tarZ \
@@ -3106,13 +3279,10 @@ $(top_builddir)/src/build-config.h: $(top_builddir)/src/build-config.h.in
 	  -e "s|[$$]{PACKAGE_TARNAME}|${PACKAGE_TARNAME}|g" \
 	  $^ > $@ || rm -f $@
 
-@GENERATE_MANPAGES_TRUE@$(top_builddir)/%.roff: %.md
-@GENERATE_MANPAGES_TRUE@	$(MKDIR_P) $$(dirname $@)
-@GENERATE_MANPAGES_TRUE@	$(PANDOC) -s -t man $^ -o $(top_builddir)/$@
-@GENERATE_MANPAGES_TRUE@	$(INSTALL) -m 644 $(top_builddir)/$@ $(top_builddir)/$(@:.roff=)
-@GENERATE_MANPAGES_FALSE@$(top_builddir)/%.roff: %.md
-@GENERATE_MANPAGES_FALSE@	$(INSTALL) -D -m 644 $(^:.md=) $(top_builddir)/$@
-@GENERATE_MANPAGES_FALSE@	$(INSTALL) -D -m 644 $(top_builddir)/$@ $(top_builddir)/$(@:.roff=)
+@DOCS_ENABLED_TRUE@$(top_builddir)/%.roff: %.adoc
+@DOCS_ENABLED_TRUE@	$(MKDIR_P) $$(dirname $@)
+@DOCS_ENABLED_TRUE@	$(A2X) -v -f manpage $^ -D $(top_builddir)/$$(dirname $@)
+@DOCS_ENABLED_TRUE@	$(INSTALL) -m 644 $(top_builddir)/$(@:.roff=) $(top_builddir)/$@
 
 install-data-hook: install-daemon-conf install-systemd-service install-data-dbus
 uninstall-hook: uninstall-daemon-conf uninstall-systemd-service uninstall-data-dbus
@@ -3268,38 +3438,13 @@ uninstall-daemon-conf:
 $(DIST_ARCHIVES):
 	test -f "$@" || $(MAKE) dist
 
-rpmbuild: $(DIST_ARCHIVES)
-	test -n "$(RPMBUILD_FLAGS)"
-	$(eval RPMBUILD_ROOT:=$(shell mktemp -d -t usbguard-srpm.XXXXXX))
-	$(eval RPMBUILD_SOURCES:=$(RPMBUILD_ROOT)/SOURCE)
-	$(eval RPMBUILD_SPECS:=$(RPMBUILD_ROOT)/SPECS)
-	$(eval RPMBUILD_BUILDS:=$(RPMBUILD_ROOT)/BUILDS)
-	$(MKDIR_P) $(RPMBUILD_SOURCES)
-	$(MKDIR_P) $(RPMBUILD_SPECS)
-	cp $(top_srcdir)/usbguard.spec $(RPMBUILD_SPECS)
-	cp $(top_builddir)/$(DIST_ARCHIVES) $(RPMBUILD_SOURCES)
-	rpmbuild $(RPMBUILD_FLAGS) \
-		--define "_sourcedir $(RPMBUILD_SOURCES)" \
-		--define "_srcrpmdir $(top_builddir)" \
-		--define "_rpmdir $(top_builddir)" \
-		--define "_builddir $(RPMBUILD_BUILDS)" \
-		"$(RPMBUILD_SPECS)/usbguard.spec"
-	rm -rf "$(RPMBUILD_ROOT)"
-
-rpmbuild-bs:
-	$(MAKE) rpmbuild RPMBUILD_FLAGS=-bs
-
-rpmbuild-ba:
-	$(MAKE) rpmbuild RPMBUILD_FLAGS=-ba
-
-release-files: rpmbuild-bs
+release-files: $(DIST_ARCHIVES)
 	$(eval RELEASE_DIR:="release.$(PACKAGE)-$(VERSION)")
-	$(eval GPG:=$(shell test -n "$$QUBES_GPG_DOMAIN" && echo qubes-gpg-client || echo gpg2))
+	$(eval GPG:=$(shell test -n "$$QUBES_GPG_DOMAIN" && echo qubes-gpg-client-wrapper || echo gpg2))
 	$(MKDIR_P) $(RELEASE_DIR)
 	cp $(DIST_ARCHIVES) $(RELEASE_DIR)
-	cp $(PACKAGE)-$(VERSION)-*.src.rpm $(RELEASE_DIR)
-	cd $(RELEASE_DIR) && $(GPG) -b -a $(DIST_ARCHIVES) > $(DIST_ARCHIVES).sig
-	cd $(RELEASE_DIR) && openssl sha -sha256 $(DIST_ARCHIVES) > $(DIST_ARCHIVES).sum
+	cd $(RELEASE_DIR) && $(GPG) -b -a -o - $(DIST_ARCHIVES) > $(DIST_ARCHIVES).sig
+	cd $(RELEASE_DIR) && openssl sha256 $(DIST_ARCHIVES) > $(DIST_ARCHIVES).sum
 
 analyze-clang:
 	$(eval ANALYSIS_ROOT:=$(shell mktemp -d -t usbguard-analyze-clang.XXXXXX))
@@ -3310,14 +3455,11 @@ analyze-clang:
 	  make -j$(JOBS)
 	rm -rf "$(ANALYSIS_ROOT)"
 
-@MAINTAINER_MODE_TRUE@check-local: check-copyright
-
-@MAINTAINER_MODE_TRUE@check-copyright:
-@MAINTAINER_MODE_TRUE@	$(eval GIT_CLONE_ROOT:=$(shell mktemp -d -t usbguard-git-clone.XXXXXX))
-@MAINTAINER_MODE_TRUE@	git clone "$(abs_top_srcdir)" "$(GIT_CLONE_ROOT)" && \
-@MAINTAINER_MODE_TRUE@	  $(top_srcdir)/src/Tests/Packaging/files-without-copyright.sh "$(GIT_CLONE_ROOT)"
-@MAINTAINER_MODE_TRUE@	rm -rf "$(GIT_CLONE_ROOT)"
-@MAINTAINER_MODE_FALSE@check-local:
+#
+# overriding 'check' target to enable "make check" to perform build as well
+#
+check: all
+	$(MAKE) $(AM_MAKEFLAGS) check-recursive
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

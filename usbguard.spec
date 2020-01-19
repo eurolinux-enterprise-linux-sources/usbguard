@@ -4,8 +4,8 @@
 %define with_dbus    0
 
 Name:           usbguard
-Version:        0.7.0
-Release:        8%{?dist}
+Version:        0.7.4
+Release:        2%{?dist}
 Summary:        A tool for implementing USB device usage policy
 Group:          System Environment/Daemons
 License:        GPLv2+
@@ -14,6 +14,8 @@ License:        GPLv2+
 URL:            https://dkopecek.github.io/usbguard
 Source0:        https://github.com/dkopecek/usbguard/releases/download/%{name}-%{version}/%{name}-%{version}.tar.gz
 Source1:        usbguard-daemon.conf
+
+Patch0: usbguard-0.7.4-loadFilesError.patch
 
 Requires: systemd
 Requires(post): systemd
@@ -30,6 +32,7 @@ BuildRequires: PEGTL-static
 BuildRequires: catch-devel
 BuildRequires: autoconf automake libtool
 BuildRequires: bash-completion
+BuildRequires: asciidoc
 BuildRequires: audit-libs-devel
 # For `pkg-config systemd` only
 BuildRequires: systemd
@@ -57,32 +60,6 @@ BuildRequires: pandoc
 #
 BuildRequires: libatomic
 %endif
-
-# 1444084 - New defects found in usbguard-0.7.0-1.el7
-Patch0: usbguard-0.7.0-covscan-uninit-ctor.patch
-# 1449344 - usbguard-daemon.conf(5) documentation issues in usbguard-0.7.0-2.el7
-Patch1: usbguard-0.7.0-fixed-usbguard-daemon-conf-man-page.patch
-Patch2: usbguard-0.7.0-fixed-usbguard-daemon-man-page.patch
-#
-# Apply upstream cleanup/refactoring changes to the 0.7.0 source
-# code to make it compatible with future upstream patches.
-#
-Patch3: usbguard-0.7.0-upstream-compat.patch
-# 1469399 - RFE: Use Type=forking instead of Type=simple in usbguard.service unit
-Patch4: usbguard-0.7.0-daemonization.patch
-#
-# Disable some tests that require a controlled environment or are not required to
-# be executed while building binary RPMs.
-#
-Patch5: usbguard-0.7.0-make-full-testsuite-conditional.patch
-# 1487230 - unknown usbguard-daemon.conf directives don't trigger an error
-Patch6: usbguard-0.7.0-strict-configuration-parsing.patch
-# 1491313 - [RFE] Integrate USBGuard with Linux Audit subsystem
-Patch7: usbguard-0.7.0-linux-audit-integration.patch
-# 1516930 - usbguard fails to start on aarch64 (RHEL-ALT)
-Patch8: usbguard-0.7.0-kernel-4.13-fix.patch
-# 1491313 - [RFE] Integrate USBGuard with Linux Audit subsystem
-Patch9: usbguard-0.7.0-libaudit-version.patch
 
 %description
 The USBGuard software framework helps to protect your computer against rogue USB
@@ -139,19 +116,9 @@ a D-Bus interface to the USBGuard daemon component.
 
 %prep
 %setup -q
+%patch0 -p1 -b .loadFilesError
 # Remove bundled library sources before build
 rm -rf src/ThirdParty/{Catch,PEGTL}
-
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
-%patch7 -p1
-%patch8 -p1
-%patch9 -p1
 
 %build
 mkdir -p ./m4
@@ -201,7 +168,7 @@ find %{buildroot} \( -name '*.la' -o -name '*.a' \) -exec rm -f {} ';'
 
 %files
 %defattr(-,root,root,-)
-%doc README.md CHANGELOG.md
+%doc CHANGELOG.md
 %license LICENSE
 %{_libdir}/*.so.*
 %{_sbindir}/usbguard-daemon
@@ -262,6 +229,18 @@ find %{buildroot} \( -name '*.la' -o -name '*.a' \) -exec rm -f {} ';'
 %endif
 
 %changelog
+* Tue Jul 31 2018 Daniel Kopeček <dkopecek@redhat.com> - 0.7.4-2
+- RHEL 7.6 erratum
+  - Restore old behavior for loading IPC access control files
+  Resolves: rhbz#1487229 - [RFE] improve log error messages for invalid usbguard-daemon.conf values
+
+* Wed Jul 11 2018 Daniel Kopeček <dkopecek@redhat.com> - 0.7.4-1
+- RHEL 7.6 erratum
+  - Replaced asciidoctor dependency with asciidoc
+  Resolves: rhbz#1508878 - Rebase USBGuard to latest upstream
+  Resolves: rhbz#1487229 - [RFE] improve log error messages for invalid usbguard-daemon.conf values
+  Resolves: rhbz#1487233 - invalid path for AuditFilePath in usbguard-daemon.conf is ignored
+
 * Wed Dec 13 2017 Daniel Kopeček <dkopecek@redhat.com> 0.7.0-8
 - RHEL 7.5 erratum
   - Require a lower version of libaudit during build-time

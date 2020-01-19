@@ -16,15 +16,20 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
 #include "usbguard.hpp"
 #include "usbguard-remove-rule.hpp"
 
-#include <IPCClient.hpp>
+#include "usbguard/IPCClient.hpp"
+
 #include <iostream>
 
 namespace usbguard
 {
-  static const char *options_short = "h";
+  static const char* options_short = "h";
 
   static const struct ::option options_long[] = {
     { "help", no_argument, nullptr, 'h' },
@@ -40,19 +45,21 @@ namespace usbguard
     stream << std::endl;
   }
 
-  int usbguard_remove_rule(int argc, char *argv[])
+  int usbguard_remove_rule(int argc, char* argv[])
   {
     int opt = 0;
 
     while ((opt = getopt_long(argc, argv, options_short, options_long, nullptr)) != -1) {
-      switch(opt) {
-        case 'h':
-          showHelp(std::cout);
-          return EXIT_SUCCESS;
-        case '?':
-          showHelp(std::cerr);
-        default:
-          return EXIT_FAILURE;
+      switch (opt) {
+      case 'h':
+        showHelp(std::cout);
+        return EXIT_SUCCESS;
+
+      case '?':
+        showHelp(std::cerr);
+
+      default:
+        return EXIT_FAILURE;
       }
     }
 
@@ -65,10 +72,10 @@ namespace usbguard
     }
 
     const uint32_t id = std::stoul(argv[0]);
-
     usbguard::IPCClient ipc(/*connected=*/true);
     ipc.removeRule(id);
-
     return EXIT_SUCCESS;
   }
 } /* namespace usbguard */
+
+/* vim: set ts=2 sw=2 et */

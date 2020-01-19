@@ -17,10 +17,15 @@
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
 #pragma once
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
 #include <cstdint>
 #include <endian.h>
 
-namespace usbguard {
+namespace usbguard
+{
 
   static inline uint16_t busEndianToHost(uint16_t bus_value)
   {
@@ -28,3 +33,5 @@ namespace usbguard {
   }
 
 } /* namespace usbguard */
+
+/* vim: set ts=2 sw=2 et */

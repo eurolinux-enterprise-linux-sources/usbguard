@@ -16,21 +16,27 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
 #include "LocaltimeCondition.hpp"
-#include "RuleParser.hpp"
 #include "Common/Utility.hpp"
+
+#include "usbguard/RuleParser.hpp"
+
 #ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE
-#include <ctime>
+  #define _XOPEN_SOURCE
+  #include <ctime>
 #endif
 
 namespace usbguard
 {
-  LocaltimeCondition::LocaltimeCondition(const String& time_range, bool negated)
+  LocaltimeCondition::LocaltimeCondition(const std::string& time_range, bool negated)
     : RuleConditionBase("localtime", time_range, negated)
   {
-    String time_begin;
-    String time_end;
+    std::string time_begin;
+    std::string time_end;
     const size_t dash_pos = time_range.find('-');
 
     if (dash_pos == std::string::npos) {
@@ -68,20 +74,18 @@ namespace usbguard
     (void)rule;
     const auto tp_now = std::chrono::system_clock::now();
     const auto daytime = std::chrono::system_clock::to_time_t(tp_now) % 86400;
-
     USBGUARD_LOG(Trace) << "daytime=" << daytime
-                        << " daytime_begin=" << _daytime_begin
-                        << " daytime_end=" << _daytime_end;
-
+      << " daytime_begin=" << _daytime_begin
+      << " daytime_end=" << _daytime_end;
     return (daytime >= _daytime_begin && daytime <= _daytime_end);
   }
 
-  RuleConditionBase * LocaltimeCondition::clone() const
+  RuleConditionBase* LocaltimeCondition::clone() const
   {
     return new LocaltimeCondition(*this);
   }
 
-  std::string LocaltimeCondition::tmToString(const struct tm * const tm)
+  std::string LocaltimeCondition::tmToString(const struct tm* const tm)
   {
     std::string tm_string;
     tm_string.append("{ tm.tm_sec=");
@@ -106,7 +110,7 @@ namespace usbguard
     return tm_string;
   }
 
-  std::time_t LocaltimeCondition::stringToDaytime(const String& string)
+  std::time_t LocaltimeCondition::stringToDaytime(const std::string& string)
   {
     USBGUARD_LOG(Trace) << "string=" << string;
     struct ::tm tm = { };
@@ -118,8 +122,8 @@ namespace usbguard
     }
 
     USBGUARD_LOG(Trace) << "tm=" << tmToString(&tm);
-
     return tm.tm_sec + 60*tm.tm_min + 60*60*tm.tm_hour;
   }
 } /* namespace usbguard */
 
+/* vim: set ts=2 sw=2 et */

@@ -16,12 +16,15 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
-#include <build-config.h>
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
 
 #include "Hash.hpp"
 #include "Base64.hpp"
-#include "Exception.hpp"
 #include "Common/Utility.hpp"
+
+#include "usbguard/Exception.hpp"
 
 namespace usbguard
 {
@@ -42,6 +45,7 @@ namespace usbguard
 
   Hash::Hash(const Hash& rhs)
   {
+    release();
 #if defined(USBGUARD_USE_LIBSODIUM)
     _state = rhs._state;
 #endif
@@ -52,6 +56,7 @@ namespace usbguard
 
   Hash::Hash(Hash&& rhs)
   {
+    release();
 #if defined(USBGUARD_USE_LIBSODIUM)
     _state = rhs._state;
     memset(&rhs._state, 0, sizeof _state);
@@ -64,6 +69,7 @@ namespace usbguard
 
   Hash& Hash::operator=(Hash&& rhs)
   {
+    release();
 #if defined(USBGUARD_USE_LIBSODIUM)
     _state = rhs._state;
     memset(&rhs._state, 0, sizeof _state);
@@ -77,25 +83,32 @@ namespace usbguard
 
   Hash::~Hash()
   {
+    release();
+  }
+
+  void Hash::release()
+  {
 #if defined(USBGUARD_USE_LIBSODIUM)
     memset(&_state, 0, sizeof _state);
 #endif
-#if defined(USBGUARD_USE_LIBGRCRYPT)
+#if defined(USBGUARD_USE_LIBGCRYPT)
+
     if (_state != nullptr) {
       gcry_md_close(_state);
     }
+
 #endif
   }
 
-  size_t Hash::update(const String& value)
+  size_t Hash::update(const std::string& value)
   {
     return update(value.c_str(), value.size());
   }
 
-  size_t Hash::update(const void * const ptr, const size_t size)
+  size_t Hash::update(const void* const ptr, const size_t size)
   {
 #if defined(USBGUARD_USE_LIBSODIUM)
-    crypto_hash_sha256_update(&_state, reinterpret_cast<const uint8_t *>(ptr), size);
+    crypto_hash_sha256_update(&_state, reinterpret_cast<const uint8_t*>(ptr), size);
 #endif
 #if defined(USBGUARD_USE_LIBGCRYPT)
     gcry_md_write(_state, ptr, size);
@@ -110,7 +123,6 @@ namespace usbguard
     while (stream.good()) {
       uint8_t buffer[4096];
       size_t buflen = 0;
-
       stream.read(reinterpret_cast<char*>(buffer), sizeof buffer);
       buflen = stream.gcount();
 
@@ -124,23 +136,25 @@ namespace usbguard
         size_hashed += buflen;
       }
     }
+
     return size_hashed;
   }
 
-  String Hash::getBase64()
+  std::string Hash::getBase64()
   {
 #if defined(USBGUARD_USE_LIBSODIUM)
     uint8_t hash_binary[crypto_hash_sha256_BYTES];
     crypto_hash_sha256_final(&_state, hash_binary);
-    const uint8_t * const hash_buffer = hash_binary;
+    const uint8_t* const hash_buffer = hash_binary;
     const size_t hash_buflen = sizeof hash_binary;
 #endif
 #if defined(USBGUARD_USE_LIBGCRYPT)
     gcry_md_final(_state);
     const size_t hash_buflen = gcry_md_get_algo_dlen(GCRY_MD_SHA256);
-    const uint8_t * const hash_buffer = gcry_md_read(_state, GCRY_MD_SHA256);
+    const uint8_t* const hash_buffer = gcry_md_read(_state, GCRY_MD_SHA256);
 #endif
-
     return base64Encode(hash_buffer, hash_buflen);
   }
 } /* namespace usbguard */
+
+/* vim: set ts=2 sw=2 et */

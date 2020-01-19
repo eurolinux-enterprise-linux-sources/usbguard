@@ -17,11 +17,13 @@
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
 #pragma once
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
 
-#include "Typedefs.hpp"
-#include <pegtl.hh>
+#include "usbguard/Typedefs.hpp"
 
-using namespace pegtl;
+#include <tao/pegtl.hpp>
 
 namespace usbguard
 {
@@ -29,6 +31,8 @@ namespace usbguard
 
   namespace UEventParser
   {
+    using namespace tao::pegtl;
+
     struct value
       : seq<not_one<'\0', '\n'>, star<not_one<'\0', '\n'>>> {};
 
@@ -58,6 +62,8 @@ namespace usbguard
 
   } /* namespace UEventParser */
 
-  void parseUEventFromFile(const String& uevent_path, UEvent& uevent, bool attributes_only = false, bool trace = false);
-  void parseUEventFromString(const String& uevent_string, UEvent& uevent, bool attributes_only = false, bool trace = false);
+  void parseUEventFromFile(const std::string& uevent_path, UEvent& uevent, bool attributes_only = false, bool trace = false);
+  void parseUEventFromString(const std::string& uevent_string, UEvent& uevent, bool attributes_only = false, bool trace = false);
 } /* namespace usbguard */
+
+/* vim: set ts=2 sw=2 et */

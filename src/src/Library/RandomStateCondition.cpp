@@ -16,13 +16,19 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
 #include "RandomStateCondition.hpp"
-#include "RuleParser.hpp"
+
+#include "usbguard/RuleParser.hpp"
+
 #include <string>
 
 namespace usbguard
 {
-  RandomStateCondition::RandomStateCondition(const String& true_probability, bool negated)
+  RandomStateCondition::RandomStateCondition(const std::string& true_probability, bool negated)
     : RuleConditionBase("random", true_probability, negated),
       _rng_gen(_rng_device()),
       _true_probability(true_probability.empty() ? 0.5 : std::stod(true_probability)),
@@ -44,9 +50,10 @@ namespace usbguard
     return _rng_dist(_rng_gen);
   }
 
-  RuleConditionBase * RandomStateCondition::clone() const
+  RuleConditionBase* RandomStateCondition::clone() const
   {
     return new RandomStateCondition(*this);
   }
 } /* namespace usbguard */
 
+/* vim: set ts=2 sw=2 et */

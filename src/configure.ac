@@ -1,7 +1,7 @@
 AC_PREREQ([2.69])
 AC_INIT([usbguard],
         m4_esyscmd_s([cat VERSION]),
-        [dkopecek@redhat.com])
+        [usbguard@usbguard.org])
 AC_CONFIG_SRCDIR([src/])
 AC_CONFIG_HEADERS([src/build-config.h.in])
 AC_CONFIG_MACRO_DIR([m4])
@@ -17,6 +17,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([no])])
 #
 EXTERNAL_CXXFLAGS="$CXXFLAGS"
 EXTERNAL_CFLAGS="$CFLAGS"
+EXTERNAL_CPPFLAGS="$CPPFLAGS"
 
 COMMON_WARNING_FLAGS=" -pedantic"
 COMMON_WARNING_FLAGS+=" -Wno-unknown-pragmas"
@@ -32,6 +33,7 @@ COMMON_WARNING_FLAGS+=" -Wswitch-enum"
 COMMON_WARNING_FLAGS+=" -Wswitch-default"
 COMMON_WARNING_FLAGS+=" -Winvalid-pch"
 COMMON_WARNING_FLAGS+=" -Wformat-nonliteral"
+COMMON_WARNING_FLAGS+=" -Wno-deprecated-register"
 #COMMON_WARNING_FLAGS+=" -flto -Wodr"
 
 #
@@ -54,6 +56,7 @@ AX_CHECK_COMPILE_FLAG([-Wno-implicit-fallthrough],
 #
 CXXFLAGS="-std=c++11 $EXTERNAL_CXXFLAGS"
 CFLAGS="-std=c99 $EXTERNAL_CFLAGS"
+CPPFLAGS="-DHAVE_BUILD_CONFIG_H $EXTERNAL_CPPFLAGS"
 
 #
 # Additional CXXFLAGS used when --enable-debug-build is used
@@ -228,6 +231,14 @@ AC_SUBST([crypto_LIBS])
 #
 # Check for optional libraries
 #
+PKG_CHECK_MODULES([audit], [audit >= 2.7.7],
+[AC_DEFINE([HAVE_LINUX_AUDIT], [1], [Linux Audit API available])
+AC_CHECK_DECLS([audit_encode_nv_string], [], [], [[#include<libaudit.h>]])
+libaudit_summary="system-wide; $audit_LIBS"],
+[AC_MSG_NOTICE([libaudit development files not found! Linux Audit support wille be turned OFF])
+libaudit_summary="not found"]
+)
+
 PKG_CHECK_MODULES([seccomp], [libseccomp >= 2.0.0],
 [AC_DEFINE([HAVE_SECCOMP], [1], [seccomp API usable])
 libseccomp_summary="system-wide; $seccomp_LIBS"],
@@ -240,6 +251,13 @@ PKG_CHECK_MODULES([libcapng], [libcap-ng >= 0.7.0],
 libcap_ng_summary="system-wide; $libcapng_LIBS"],
 [AC_MSG_NOTICE([libseccomp development files not found! Seccomp support will be turned OFF])
 libcap_ng_summary="not found"]
+)
+
+PKG_CHECK_MODULES([umockdev], [umockdev-1.0 >= 0.8.0],
+[AC_DEFINE([HAVE_UMOCKDEV], [1], [umockdev API usable])
+umockdev_summary="system-wide; $umockdev_LIBS"],
+[AC_MSG_NOTICE([umockdev development files not found! umockdev device manager won't be available])
+umockdev_summary="not found"]
 )
 
 PKG_CHECK_MODULES([protobuf], [protobuf >= 2.5.0],
@@ -280,54 +298,28 @@ AC_SUBST([catch_LIBS])
 #
 AC_ARG_WITH([bundled-pegtl], AS_HELP_STRING([--with-bundled-pegtl], [Build using the bundled PEGTL library]), [with_bundled_pegtl=$withval], [with_bundled_pegtl=no])
 if test "x$with_bundled_pegtl" = xyes; then
-	pegtl_CFLAGS="-I\$(top_srcdir)/src/ThirdParty/PEGTL"
-	pegtl_AC_CFLAGS="-I$srcdir/src/ThirdParty/PEGTL"
+	pegtl_CFLAGS="-I\$(top_srcdir)/src/ThirdParty/PEGTL/include"
+	pegtl_AC_CFLAGS="-I$srcdir/src/ThirdParty/PEGTL/include"
 	pegtl_LIBS=""
 	AC_MSG_NOTICE([Using bundled PEGTL library])
 	pegtl_summary="bundled; $pegtl_CFLAGS $pegtl_LIBS"
 else
-	SAVE_CPPFLAGS=$CPPFLAGS
-	CPPFLAGS="-std=c++11 $CPPFLAGS"
-	AC_LANG_PUSH([C++])
-	AC_CHECK_HEADER([pegtl.hh], [], [AC_MSG_FAILURE(pegtl.hh not found or not usable. Re-run with --with-bundled-pegtl to use the bundled library.)])
-	AC_LANG_POP
 	pegtl_CFLAGS=""
 	pegtl_AC_CFLAGS=""
 	pegtl_LIBS=""
-	CPPFLAGS=$SAVE_CPPFLAGS
 	pegtl_summary="system-wide; $pegtl_CFLAGS $pegtl_LIBS"
 fi
 AC_SUBST([pegtl_CFLAGS])
 AC_SUBST([pegtl_AC_CFLAGS])
 AC_SUBST([pegtl_LIBS])
 
-#
-# Check whether the available PEGTL library is compatible
-# with version 1.3.1 or older.
-#
 SAVE_CPPFLAGS=$CPPFLAGS
-CPPFLAGS="-std=c++11 $pegtl_AC_CFLAGS"
+CPPFLAGS="-std=c++11 $CPPFLAGS $pegtl_AC_CFLAGS"
 AC_LANG_PUSH([C++])
-AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
-#include <pegtl.hh>
-#include <string>
-int main(void)
-{
-  struct grammar
-   : pegtl::one<'g'> {};
-  try {
-    pegtl::parse_string<grammar>(std::string(), std::string());
-  } catch(const pegtl::parse_error& ex) {
-    auto b = ex.positions[0].byte_in_line;
-  }
-  return 0;
-}
-]])],
-[have_pegtl_lte_131=no], [have_pegtl_lte_131=yes])
+AC_CHECK_HEADER([tao/pegtl.hpp],
+		[AC_DEFINE([HAVE_TAO_PEGTL_HPP], [1], [PEGTL header file with .hpp extension is present])],
+		[AC_MSG_FAILURE(PEGTL header file not found or not usable. Re-run with --with-bundled-pegtl to use the bundled library.)])
 AC_LANG_POP
-if test "x$have_pegtl_lte_131" = xyes; then
-  AC_DEFINE([HAVE_PEGTL_LTE_1_3_1], [1], [PEGTL version less than or equal to 1.3.1])
-fi
 CPPFLAGS=$SAVE_CPPFLAGS
 
 #
@@ -460,10 +452,10 @@ if test "x$with_dbus" = xyes; then
     #
     case "$dbus_services_dir" in
       /usr/share/*|/usr/local/share/*)
-        dbus_services_dir=$(sed -r 's,^(/usr/share|/usr/local/share),${datadir},'<<<$dbus_services_dir)
+        dbus_services_dir=$(echo "$dbus_services_dir" | sed -r 's,^(/usr/share|/usr/local/share),${datadir},')
       ;;
       /usr/*|/usr/local/*)
-        dbus_services_dir=$(sed -r 's,^(/usr|/usr/local),${prefix},'<<<$dbus_services_dir)
+        dbus_services_dir=$(echo "$dbus_services_dir" | sed -r 's,^(/usr|/usr/local),${prefix},')
       ;;
       /*)
         dbus_services_dir='${prefix}'"$dbus_services_dir"
@@ -571,17 +563,12 @@ if test "x$enable_tsan" = xyes; then
 fi
 
 #
-# Check whether the pandoc utility is present.
+# Check whether asciidoc (a2x) is present.
 #
-# If pandoc is not present, manpages won't be
-# generated from source and their pre-generated
-# version will be used instead.
-#
-AC_CHECK_PROGS(PANDOC, [pandoc])
-if test -z "$PANDOC"; then
-  AC_MSG_WARN([Unable to find manpage generator (pandoc). Installation will use pre-generated files.])
+AC_CHECK_PROGS(A2X, [a2x])
+if test -z "$A2X"; then
+  AC_MSG_WARN([Unable to find documentation generator (asciidoc / a2x). Documentation will not be generated.])
 fi
-AM_CONDITIONAL([GENERATE_MANPAGES], [test -n "$PANDOC"])
 
 #
 # Check whether the aspell utility is present.
@@ -595,13 +582,15 @@ if test -z "$ASPELL"; then
 fi
 
 #
-# Maintainer mode.
+# Full test suite mode.
 #
-# Runs several additional taks for certain make targets (e.g. tests)
+# Runs all available test when enabled. Some tests make assumption about
+# the environment they run in, so they might fail when these assumptions
+# are not met.
 #
-AC_ARG_ENABLE([maintainer-mode],
-              [AS_HELP_STRING([--enable-maintainer-mode], [Enable maintainer mode (default=no)])],
-              [maintainer_mode=$enableval], [maintainer_mode=no])
+AC_ARG_ENABLE([full-test-suite],
+              [AS_HELP_STRING([--enable-full-test-suite], [Run the full test suite (default=no)])],
+              [full_test_suite=$enableval], [full_test_suite=no])
 
 # Checks for header files.
 AC_LANG_PUSH([C++])
@@ -695,10 +684,10 @@ AC_SUBST([ANALYZE_CONFIGURE_ARGS], $ac_configure_args)
 
 case "$bash_completion_dir" in
   /usr/share/*|/usr/local/share/*)
-    bash_completion_dir=$(sed -r 's,^(/usr/share|/usr/local/share),${datadir},'<<<$bash_completion_dir)
+    bash_completion_dir=$(echo "$bash_completion_dir" | sed -r 's,^(/usr/share|/usr/local/share),${datadir},')
     ;;
   /usr/*|/usr/local/*)
-    bash_completion_dir=$(sed -r 's,^(/usr|/usr/local),${prefix},'<<<$bash_completion_dir)
+    bash_completion_dir=$(echo "$bash_completion_dir" | sed -r 's,^(/usr|/usr/local),${prefix},')
     ;;
   /*)
     bash_completion_dir='${prefix}'"$bash_completion_dir"
@@ -710,9 +699,10 @@ AC_SUBST([BASH_COMPLETION_DIR], $bash_completion_dir)
 AM_CONDITIONAL([SYSTEMD_SUPPORT_ENABLED], [test "x$systemd" = xyes ])
 AM_CONDITIONAL([GUI_QT_ENABLED], [test "x$build_gui_qt" = xyes ])
 AM_CONDITIONAL([DBUS_ENABLED], [test "x$with_dbus" = xyes ])
+AM_CONDITIONAL([DOCS_ENABLED], [! test -z "$A2X" ])
 AM_CONDITIONAL([POLICYKIT_ENABLED], [test "x$with_polkit" = xyes])
-AM_CONDITIONAL([MAINTAINER_MODE], [test "x$maintainer_mode" = xyes])
-AM_CONDITIONAL([BASH_COMPLETION_ENABLED],[test "x$bash_completion" != "xno"])
+AM_CONDITIONAL([FULL_TEST_SUITE_ENABLED], [test "x$full_test_suite" = xyes])
+AM_CONDITIONAL([BASH_COMPLETION_ENABLED], [test "x$bash_completion" != xno])
 
 CXXFLAGS="$CXXFLAGS -fvisibility=hidden $COMMON_WARNING_FLAGS $WARNING_CXXFLAGS"
 CFLAGS="$CFLAGS -fvisibility=hidden $COMMON_WARNING_FLAGS $WARNING_CFLAGS"
@@ -742,12 +732,13 @@ echo
 echo "    Build Configuration Summary    "
 echo "==================================="
 echo
-echo " Maintainer mode: $maintainer_mode"
+echo " Run full test suite: $full_test_suite"
 echo
 echo "## Libraries"
 echo
 echo "      libqb: $libqb_summary"
 echo "     crypto: $crypto_summary"
+echo "   libaudit: $libaudit_summary"
 echo " libseccomp: $libseccomp_summary"
 echo "  libcap-ng: $libcap_ng_summary"
 echo "   protobuf: $protobuf_summary"
@@ -755,6 +746,7 @@ echo "      Catch: $catch_summary"
 echo "      PEGTL: $pegtl_summary; version <= 1.3.1: $have_pegtl_lte_131"
 echo "         Qt: $qt_summary"
 echo " GLib D-Bus: $dbus_summary"
+echo "   umockdev: $umockdev_summary"
 echo
 echo "## Directories"
 echo
@@ -766,7 +758,8 @@ echo "   Bash completion dir: $BASH_COMPLETION_DIR"
 echo
 echo "## Compilation Flags"
 echo
-echo " Debug Mode: $debug"
+echo "Debug Build: $debug"
+echo "       DEFS: $DEFS"
 echo "   CXXFLAGS: $CXXFLAGS"
 echo "     CFLAGS: $CFLAGS"
 echo "   CPPFLAGS: $CPPFLAGS"

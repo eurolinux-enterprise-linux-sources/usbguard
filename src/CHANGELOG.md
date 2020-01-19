@@ -1,5 +1,84 @@
 # Change Log
 
+## 0.7.4 - 2018-07-12
+
+### Fixed/Changed
+
+- Fixed conditional manual page generation & installation
+- Replaced Boost library based ext/stdio_filebuf.h implementation
+  with a custom FDStreamBuf implementation
+
+## 0.7.3 - 2018-07-11
+
+### Changed
+
+- usbguard-daemon will now exit with an error if it fails to open
+  a logging file or audit event file.
+- Updated PEGTL submodule and dropped support for older PEGTL API
+- Modified the present device enumeration algorithm to be more
+  reliable. Enumeration timeouts won't cause usbguard-daemon process
+  to exit anymore.
+- Manual pages are now generated using asciidoc (a2x) instead of
+  asciidoctor.
+- Generation and installation of manual pages is now optional.
+- Fixed several bugs D-Bus interface XML specification
+
+### Added
+
+- umockdev based device manager capable of simulating devices based
+  on umockdev-record files.
+- Boost libraries can be used as ext/stdio_filebuf.h header file source.
+
+### Removed
+
+- Removed DummyDevices.tar.xz tarball that was supposed to be used for
+  testing.
+
+## 0.7.2 - 2018-01-22
+
+### Fixed/Changed
+
+- Fixed memory leaks in usbguard::Hash class.
+- Fixed file descriptor leaks in usbguard::SysFSDevice class.
+- Skip audit backend logging when no backend was set.
+
+### Added
+
+- Added zsh completion & other scripts to the distribution tarball.
+
+## 0.7.1 - 2017-11-30
+
+### Added
+- CLI: usbguard watch command now includes an -e <path> option to run an executable
+  for every received event. Event data are passed to the executable via environment
+  variables.
+- usbguard-daemon: added "-K" option which can disable logging to console.
+- Added zsh autocompletion support.
+- usbguard-daemon: added "-f" option which enabled double-fork daemonization procedure.
+- Added AuditBackend usbguard-daemon configuration option for selecting audit log backend.
+- Linux Audit support via new LinuxAudit backend.
+- Added missing RuleCondition.hpp header file to the public API headers.
+- Code Style specification via AStyle configuration file.
+
+### Removed
+- Removed Utility.hpp header file from public API headers
+- Reduced usage of raw C pointers throughout the code
+
+### Changed
+- Qt Applet: disabled session management
+- usbguard-daemon console logging output is enabled by default now.   Previously,
+  the -k option had to be passed to enable the output.
+- Replaced --enable-maintainer-mode configure option with --enable-full-test-suite
+  option. When the new option is not used during the configure phase, only a basic
+  set of test is run during the make check phase.
+- usbguard-daemon now opens configuration in read-only mode
+- Fixed UEventDeviceManager to work with Linux Kernel >= 4.13
+- Refactored audit logging to support different audit log backends
+- Reformatted source code to conform to the code style.
+- Made the configuration parser strict. Unknown directives and wrong syntax will
+  cause an error.
+- Reformated documentation from markdown to asciidoc format.
+
 ## 0.7.0 - 2017-04-12
 ### Added
 - Added InsertedDevicePolicy configuration option to control the policy

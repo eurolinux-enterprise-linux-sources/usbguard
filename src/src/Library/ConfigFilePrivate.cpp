@@ -16,123 +16,145 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
 
 #include "ConfigFilePrivate.hpp"
+#include "KeyValueParser.hpp"
+
 #include "Common/Utility.hpp"
-#include "Logger.hpp"
+
+#include "usbguard/Exception.hpp"
+#include "usbguard/Logger.hpp"
+
 #include <stdexcept>
+#include <vector>
+#include <string>
+
+#include <cstddef>
+
 
 namespace usbguard
 {
-  ConfigFilePrivate::ConfigFilePrivate(ConfigFile& p_instance, const StringVector& known_names)
+  ConfigFilePrivate::ConfigFilePrivate(ConfigFile& p_instance, const std::vector<std::string>& known_names)
     : _p_instance(p_instance),
       _known_names(known_names)
   {
     (void)_p_instance;
     _dirty = false;
+    _readonly = false;
   }
 
   ConfigFilePrivate::~ConfigFilePrivate()
   {
-    if (_dirty && _stream) {
-      write();
-      _dirty = false;
-    }
+    close();
   }
 
-  void ConfigFilePrivate::open(const String& path)
+  void ConfigFilePrivate::open(const std::string& path, bool readonly)
   {
-    _stream.open(path, std::ios::in|std::ios::out);
-    if (!_stream.is_open()) {
-      throw std::runtime_error("Can't open " + path);
+    _readonly = readonly;
+
+    if (_readonly) {
+      _stream.open(path, std::ios::in);
     }
-    _dirty = false;
+    else {
+      _stream.open(path, std::ios::in|std::ios::out);
+    }
+
+    if (!_stream.is_open()) {
+      throw Exception("Configuration", path, "unable to open the configuration file");
+    }
+
     parse();
   }
 
   void ConfigFilePrivate::write()
   {
     if (!_stream.is_open()) {
-      throw std::runtime_error("BUG: ConfigFilePrivate::write: write() before open()");
+      throw USBGUARD_BUG("ConfigFilePrivate::write: write() before open()");
+    }
+
+    if (_readonly) {
+      throw USBGUARD_BUG("ConfigFilePrivate::write: not applicable in read-only mode");
     }
 
     if (_dirty) {
       /* Update _lines */
-      for(auto const& map_entry : _settings) {
+      for (auto const& map_entry : _settings) {
         const NVPair& setting = map_entry.second;
         _lines[setting.line_number - 1] = setting.name + "=" + setting.value;
       }
     }
 
+    _stream.clear();
     _stream.seekp(0);
+
     for (auto const& line : _lines) {
       _stream << line << std::endl;
+
+      if (!_stream.good()) {
+        throw Exception("Configuration", "write", "failed to write configuration to disk");
+      }
     }
+
     _stream.flush();
     _dirty = false;
   }
 
   void ConfigFilePrivate::close()
   {
-    if (_dirty && _stream) {
-      write();
+    if (_stream) {
+      if (_dirty && !_readonly) {
+        write();
+      }
+
+      _stream.close();
     }
-    _dirty = false;
-    _stream.close();
   }
 
-  const String& ConfigFilePrivate::getSettingValue(const String& name) const
+  const std::string& ConfigFilePrivate::getSettingValue(const std::string& name) const
   {
     const NVPair& setting = _settings.at(name);
     return setting.value;
   }
 
-  void ConfigFilePrivate::setSettingValue(const String& name, String& value)
+  void ConfigFilePrivate::setSettingValue(const std::string& name, std::string& value)
   {
     NVPair& setting = _settings.at(name);
     setting.value = value;
     _dirty = true;
   }
 
-  bool ConfigFilePrivate::hasSettingValue(const String& name) const
+  bool ConfigFilePrivate::hasSettingValue(const std::string& name) const
   {
     return (_settings.count(name) != 0);
   }
 
   void ConfigFilePrivate::parse()
   {
-    String config_line;
+    std::string config_line;
     size_t config_line_number = 0;
+    KeyValueParser kvparser(_known_names, "=", /*case_sensitive?*/true);
 
-    while(std::getline(_stream, config_line)) {
+    while (std::getline(_stream, config_line)) {
       ++config_line_number;
       _lines.push_back(config_line);
 
-      const size_t nv_separator = config_line.find_first_of("=");
-      if (nv_separator == String::npos) {
+      if ((config_line.size() < 1) || (config_line[0] == '#')) {
         continue;
       }
 
-      String name = trim(config_line.substr(0, nv_separator));
-      String value = config_line.substr(nv_separator + 1);
-
-      if (name[0] == '#') {
-        continue;
-      }
-
-      if (!checkNVPair(name, value)) {
-        continue;
-      }
-
-      NVPair& setting = _settings[name];
-
-      setting.name = name;
-      setting.value = value;
+      auto p = kvparser.parseLine(config_line);
+      NVPair& setting = _settings[p.first];
+      setting.name = p.first;
+      setting.value = p.second;
       setting.line_number = config_line_number;
+      USBGUARD_LOG(Debug) << "Parsed: " << p.first << "=" << p.second;
     }
   }
 
-  bool ConfigFilePrivate::checkNVPair(const String& name, const String& value) const
+  bool ConfigFilePrivate::checkNVPair(const std::string& name, const std::string& value) const
   {
     (void)value; /* TODO */
 
@@ -149,6 +171,9 @@ namespace usbguard
         return true;
       }
     }
+
     return false;
   }
 } /* namespace usbguard */
+
+/* vim: set ts=2 sw=2 et */

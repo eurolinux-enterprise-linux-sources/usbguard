@@ -16,87 +16,97 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
-#include <build-config.h>
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
 
 #include "UEventParser.hpp"
 #include "UEvent.hpp"
-#include "Logger.hpp"
 #include "Common/Utility.hpp"
 
+#include "usbguard/Logger.hpp"
+
 #include <fstream>
-#include <pegtl/trace.hh>
+
+#include <tao/pegtl/contrib/tracer.hpp>
+using namespace tao;
 
 namespace usbguard
 {
   namespace UEventParser
   {
     template<typename Rule>
-      struct actions
-        : pegtl::nothing<Rule> {};
+    struct actions
+      : pegtl::nothing<Rule> {};
 
     template<>
-      struct actions<attribute>
+    struct actions<attribute> {
+      template<typename Input>
+      static void apply(const Input& in, UEvent& uevent)
       {
-        template<typename Input>
-          static void apply(const Input& in, UEvent& uevent)
-          {
-            try {
-              const auto p = in.string().find_first_of('=');
+        try {
+          const auto p = in.string().find_first_of('=');
 
-              if (p == std::string::npos || p == (in.string().size() - 1)) {
-                throw pegtl::parse_error("invalid attribute format", in);
-              }
+          if (p == std::string::npos || p == (in.string().size() - 1)) {
+            throw pegtl::parse_error("invalid attribute format", in);
+          }
 
-              const String key = in.string().substr(0, p);
-              const String value = trim(in.string().substr(p + 1, std::string::npos), String("\n\0", 2));
+          const std::string key = in.string().substr(0, p);
+          const std::string value = trim(in.string().substr(p + 1, std::string::npos), std::string("\n\0", 2));
 
-              for (const String header_key : { "ACTION", "DEVPATH" }) {
-                if (key == header_key) {
-                  if (value != uevent.getAttribute(header_key)) {
-                    throw pegtl::parse_error("header value mismatch", in);
-                  }
+          for (const std::string header_key : {
+          "ACTION", "DEVPATH"
+        }) {
+            if (key == header_key) {
+              /*
+               * Sanity check the value only if the value is already assigned,
+               * because with umockdev device manager we need to parse ACTION
+               * and DEVPATH from the uevent data and we don't know it before
+               * that.
+               */
+              if (!uevent.getAttribute(header_key).empty()) {
+                if (value != uevent.getAttribute(header_key)) {
+                  throw pegtl::parse_error("header value mismatch", in);
                 }
               }
-
-              uevent.setAttribute(key, value);
-            }
-            catch(const pegtl::parse_error& ex) {
-              throw;
-            }
-            catch(const std::exception& ex) {
-              throw pegtl::parse_error(ex.what(), in);
             }
           }
-      };
-
-    template<>
-      struct actions<action>
-      {
-        template<typename Input>
-          static void apply(const Input& in, UEvent& uevent)
-          {
-            uevent.setAttribute("ACTION", in.string());
-          }
-      };
+          uevent.setAttribute(key, value);
+        }
+        catch (const pegtl::parse_error& ex) {
+          throw;
+        }
+        catch (const std::exception& ex) {
+          throw pegtl::parse_error(ex.what(), in);
+        }
+      }
+    };
 
     template<>
-      struct actions<devpath>
+    struct actions<action> {
+      template<typename Input>
+      static void apply(const Input& in, UEvent& uevent)
       {
-        template<typename Input>
-          static void apply(const Input& in, UEvent& uevent)
-          {
-            uevent.setAttribute("DEVPATH", in.string());
-          }
-      };
+        uevent.setAttribute("ACTION", in.string());
+      }
+    };
+
+    template<>
+    struct actions<devpath> {
+      template<typename Input>
+      static void apply(const Input& in, UEvent& uevent)
+      {
+        uevent.setAttribute("DEVPATH", in.string());
+      }
+    };
   } /* namespace UEventParser */
 
-  void parseUEventFromFile(const String& uevent_path, UEvent& uevent, bool attributes_only, bool trace)
+  void parseUEventFromFile(const std::string& uevent_path, UEvent& uevent, bool attributes_only, bool trace)
   {
     std::ifstream uevent_stream(uevent_path);
 
     if (uevent_stream.good()) {
       std::string uevent_string(4096, 0);
-
       uevent_stream.readsome(&uevent_string[0], uevent_string.capacity());
       const auto read_size = uevent_stream.gcount();
 
@@ -111,31 +121,24 @@ namespace usbguard
   }
 
   template<class G>
-  void parseUEventFromString(const String& uevent_string, UEvent& uevent, bool trace)
-  { 
+  void parseUEventFromString(const std::string& uevent_string, UEvent& uevent, bool trace)
+  {
     try {
-#if HAVE_PEGTL_LTE_1_3_1
+      tao::pegtl::string_input<> in(uevent_string, std::string());
+
       if (!trace) {
-        pegtl::parse<G, UEventParser::actions>(uevent_string, String(), uevent);
+        tao::pegtl::parse<G, UEventParser::actions>(in, uevent);
       }
       else {
-        pegtl::parse<G, UEventParser::actions, pegtl::tracer>(uevent_string, String(), uevent);
+        tao::pegtl::parse<G, UEventParser::actions, tao::pegtl::tracer>(in, uevent);
       }
-#else
-      if (!trace) {
-        pegtl::parse_string<G, UEventParser::actions>(uevent_string, String(), uevent);
-      }
-      else {
-        pegtl::parse_string<G, UEventParser::actions, pegtl::tracer>(uevent_string, String(), uevent);
-      }
-#endif
     }
-    catch(...) {
+    catch (...) {
       throw;
     }
   }
 
-  void parseUEventFromString(const String& uevent_string, UEvent& uevent, bool attributes_only, bool trace)
+  void parseUEventFromString(const std::string& uevent_string, UEvent& uevent, bool attributes_only, bool trace)
   {
     if (attributes_only) {
       parseUEventFromString<UEventParser::attributes>(uevent_string, uevent, trace);
@@ -145,3 +148,5 @@ namespace usbguard
     }
   }
 } /* namespace usbguard */
+
+/* vim: set ts=2 sw=2 et */

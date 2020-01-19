@@ -1,0 +1,17 @@
+diff -up usbguard-0.7.4/src/Daemon/Daemon.cpp.loadFilesError usbguard-0.7.4/src/Daemon/Daemon.cpp
+--- usbguard-0.7.4/src/Daemon/Daemon.cpp.loadFilesError	2018-07-10 14:25:41.580361063 +0200
++++ usbguard-0.7.4/src/Daemon/Daemon.cpp	2018-07-31 10:19:21.529000000 +0200
+@@ -365,7 +365,12 @@ namespace usbguard
+     ,
+     [this](const std::string& basename, const std::string& fullpath) {
+       return loadIPCAccessControlFile(basename, fullpath);
+-    });
++    },
++    [](const std::pair<std::string, std::string>& a, const std::pair<std::string, std::string>& b)
++    {
++      return a.first < b.first;
++    },
++    /*directory_required=*/true);
+   }
+ 
+   void Daemon::checkIPCAccessControlName(const std::string& name)

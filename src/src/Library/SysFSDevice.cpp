@@ -16,14 +16,18 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
 
 #include "SysFSDevice.hpp"
-#include "Logger.hpp"
-#include "Exception.hpp"
 #include "Common/Utility.hpp"
 
+#include "usbguard/Logger.hpp"
+#include "usbguard/Exception.hpp"
+
 #ifndef _POSIX_C_SOURCE
-#define _POSIX_C_SOURCE
+  #define _POSIX_C_SOURCE
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -32,18 +36,30 @@
 
 namespace usbguard
 {
+  static std::string G_sysfs_root = "/sys";
+
+  void SysFSDevice::setSysfsRoot(const std::string& sysfs_root)
+  {
+    G_sysfs_root = sysfs_root;
+  }
+
+  const std::string& SysFSDevice::getSysfsRoot()
+  {
+    return G_sysfs_root;
+  }
+
   SysFSDevice::SysFSDevice()
     : _sysfs_dirfd(-1)
   {
   }
 
-  SysFSDevice::SysFSDevice(const String& sysfs_path, bool without_parent)
+  SysFSDevice::SysFSDevice(const std::string& sysfs_path, bool without_parent)
     : _sysfs_path(sysfs_path),
       _sysfs_name(filenameFromPath(_sysfs_path, /*include_extension=*/true)),
       _sysfs_dirfd(-1)
   {
     USBGUARD_LOG(Trace) << "sysfs_path=" << sysfs_path
-                        << " without_parent=" << without_parent;
+      << " without_parent=" << without_parent;
 
     if (!without_parent) {
       _sysfs_parent_path = parentPath(sysfs_path);
@@ -56,12 +72,12 @@ namespace usbguard
     }
 
     USBGUARD_SYSCALL_THROW("SysFSDevice",
-      (_sysfs_dirfd = open(_sysfs_path.c_str(), O_PATH|O_DIRECTORY)) < 0);
+      (_sysfs_dirfd = open((G_sysfs_root + _sysfs_path).c_str(), O_PATH|O_DIRECTORY)) < 0);
 
     try {
       reloadUEvent();
     }
-    catch(...) {
+    catch (...) {
       close(_sysfs_dirfd);
       throw;
     }
@@ -95,12 +111,12 @@ namespace usbguard
     return *this;
   }
 
-  const String& SysFSDevice::getPath() const
+  const std::string& SysFSDevice::getPath() const
   {
     return _sysfs_path;
   }
 
-  const String& SysFSDevice::getName() const
+  const std::string& SysFSDevice::getName() const
   {
     return _sysfs_name;
   }
@@ -110,82 +126,111 @@ namespace usbguard
     return _uevent;
   }
 
-  const String& SysFSDevice::getParentPath() const
+  const std::string& SysFSDevice::getParentPath() const
   {
     return _sysfs_parent_path;
   }
 
-  int SysFSDevice::openAttribute(const String& name) const
+  bool SysFSDevice::hasAttribute(const std::string& name) const
+  {
+    struct ::stat st;
+
+    if (::fstatat(_sysfs_dirfd, name.c_str(), &st, AT_SYMLINK_NOFOLLOW) != 0) {
+      if (errno == ENOENT) {
+        return false;
+      }
+
+      throw ErrnoException("SysFSDevice::hasAttribute", name, errno);
+    }
+
+    return S_ISREG(st.st_mode);
+  }
+
+  int SysFSDevice::openAttribute(const std::string& name) const
   {
     USBGUARD_LOG(Trace) << "name=" << name;
-
     const int fd = openat(_sysfs_dirfd, name.c_str(), O_RDONLY);
+
     if (fd < 0) {
       throw ErrnoException("SysFSDevice", name, errno);
     }
+
     return fd;
   }
 
-  String SysFSDevice::readAttribute(const String& name, bool strip_last_null, bool optional) const
+  std::string SysFSDevice::readAttribute(const std::string& name, bool trim, bool optional) const
   {
     USBGUARD_LOG(Trace) << "name=" << name;
+    const ScopedFD fd(openat(_sysfs_dirfd, name.c_str(), O_RDONLY));
 
-    const int fd = openat(_sysfs_dirfd, name.c_str(), O_RDONLY);
     if (fd < 0) {
       if (optional && errno == ENOENT) {
-        return String();
+        return std::string();
       }
       else {
         throw ErrnoException("SysFSDevice", name, errno);
       }
     }
-    try {
-      String buffer(4096, 0);
-      ssize_t rc = -1;
-      USBGUARD_SYSCALL_THROW("SysFSDevice",
-          (rc = read(fd, &buffer[0], buffer.capacity())) < 0);
 
-      if (strip_last_null) {
-        if (rc > 0) {
-          buffer.resize(static_cast<size_t>(rc) - 1);
+    std::string buffer(4096, 0);
+    ssize_t rc = -1;
+    USBGUARD_SYSCALL_THROW("SysFSDevice",
+      (rc = read(fd, &buffer[0], buffer.capacity())) < 0);
+
+    if (rc <= 0) {
+      return std::string();
+    }
+
+    const size_t read_size = static_cast<size_t>(rc);
+
+    if (trim) {
+      size_t trimmed_size = read_size;
+
+      while (trimmed_size > 0) {
+        bool stop = false;
+
+        switch (buffer[trimmed_size - 1]) {
+        case '\0':
+        case '\n':
+        case '\r':
+        case '\t':
+        case '\b':
+          break;
+
+        default:
+          stop = true;
+        }
+
+        if (stop) {
+          break;
         }
         else {
-          return String();
+          --trimmed_size;
         }
       }
-      else {
-        buffer.resize(static_cast<size_t>(rc));
-      }
 
-      USBGUARD_LOG(Debug) << "value=" << buffer << " size=" << buffer.size();
+      buffer.resize(trimmed_size);
+    }
+    else {
+      buffer.resize(read_size);
+    }
 
-      return buffer;
-    }
-    catch(...) {
-      close(fd);
-      throw;
-    }
+    return buffer;
   }
 
-  void SysFSDevice::setAttribute(const String& name, const String& value)
+  void SysFSDevice::setAttribute(const std::string& name, const std::string& value)
   {
     USBGUARD_LOG(Trace) << "name=" << name << " value=" << value;
     USBGUARD_LOG(Trace) << "path=" << _sysfs_path;
+    const ScopedFD fd(openat(_sysfs_dirfd, name.c_str(), O_WRONLY));
 
-    const int fd = openat(_sysfs_dirfd, name.c_str(), O_WRONLY);
     if (fd < 0) {
       throw ErrnoException("SysFSDevice", name, errno);
     }
-    try {
-      ssize_t rc = -1;
-      USBGUARD_SYSCALL_THROW("SysFSDevice",
-          (rc = write(fd, &value[0], value.size())) != (ssize_t)value.size());
-      return;
-    }
-    catch(...) {
-      close(fd);
-      throw;
-    }
+
+    ssize_t rc = -1;
+    USBGUARD_SYSCALL_THROW("SysFSDevice",
+      (rc = write(fd, &value[0], value.size())) != (ssize_t)value.size());
   }
 
   void SysFSDevice::reload()
@@ -195,7 +240,9 @@ namespace usbguard
 
   void SysFSDevice::reloadUEvent()
   {
-    const String uevent_string = readAttribute("uevent");
+    const std::string uevent_string = readAttribute("uevent");
     _uevent = UEvent::fromString(uevent_string, /*attributes_only=*/true);
   }
-} /* namespace usbguard */ 
+} /* namespace usbguard */
+
+/* vim: set ts=2 sw=2 et */

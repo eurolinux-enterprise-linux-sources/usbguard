@@ -17,9 +17,14 @@
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
 #pragma once
-#include "Typedefs.hpp"
-#include "RuleCondition.hpp"
-#include "Rule.hpp"
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
+#include "usbguard/Typedefs.hpp"
+#include "usbguard/Rule.hpp"
+
+#include "usbguard/RuleCondition.hpp"
 
 namespace usbguard
 {
@@ -29,9 +34,10 @@ namespace usbguard
     FixedStateCondition(bool state, bool negated = false);
     FixedStateCondition(const FixedStateCondition& rhs);
     bool update(const Rule& rule);
-    RuleConditionBase * clone() const;
+    RuleConditionBase* clone() const;
   private:
     const bool _state;
   };
 } /* namespace usbguard */
 
+/* vim: set ts=2 sw=2 et */

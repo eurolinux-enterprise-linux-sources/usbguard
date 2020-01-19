@@ -1,5 +1,9 @@
-# Copyright (c) 2014-2015 Dr. Colin Hirsch and Daniel Frey
-# Please see LICENSE for license or visit https://github.com/ColinH/PEGTL
+# The Art of C++
+# Copyright (c) 2014-2018 Dr. Colin Hirsch and Daniel Frey
+# Please see LICENSE for license or visit https://github.com/taocpp/PEGTL
+
+.SUFFIXES:
+.SECONDARY:
 
 ifeq ($(OS),Windows_NT)
 UNAME_S := $(OS)
@@ -10,48 +14,80 @@ else
 UNAME_S := $(shell uname -s)
 endif
 
-# For Darwin (Mac OS X) we assume that the default compiler
+# For Darwin (Mac OS X / macOS) we assume that the default compiler
 # clang++ is used; when $(CXX) is some version of g++, then
-# $(PEGTL_CXXSTD) has to be set to -std=c++11 (or newer) so
+# $(CXXSTD) has to be set to -std=c++11 (or newer) so
 # that -stdlib=libc++ is not automatically added.
 
-ifeq ($(PEGTL_CXXSTD),)
-PEGTL_CXXSTD := -std=c++11
+ifeq ($(CXXSTD),)
+CXXSTD := -std=c++11
 ifeq ($(UNAME_S),Darwin)
-PEGTL_CXXSTD += -stdlib=libc++
+CXXSTD += -stdlib=libc++
 endif
 endif
 
 # Ensure strict standard compliance and no warnings, can be
 # changed if desired.
 
-PEGTL_CPPFLAGS ?= -pedantic
-PEGTL_CXXFLAGS ?= -Wall -Wextra -Werror -O3 $(MINGW_CXXFLAGS)
+CPPFLAGS ?= -pedantic
+CXXFLAGS ?= -Wall -Wextra -Wshadow -Werror -O3 $(MINGW_CXXFLAGS)
 
-.PHONY: all clean
+CLANG_TIDY ?= clang-tidy
 
-SOURCES := $(wildcard */*.cc)
-DEPENDS := $(SOURCES:%.cc=build/%.d)
-BINARIES := $(SOURCES:%.cc=build/%)
+HEADERS := $(filter-out include/tao/pegtl/internal/endian_win.hpp,$(shell find include -name '*.hpp')) $(filter-out src/test/pegtl/main.hpp,$(shell find src -name '*.hpp'))
+SOURCES := $(shell find src -name '*.cpp')
+DEPENDS := $(SOURCES:%.cpp=build/%.d)
+BINARIES := $(SOURCES:%.cpp=build/%)
 
-UNIT_TESTS := $(filter build/unit_tests/%,$(BINARIES))
+UNIT_TESTS := $(filter build/src/test/%,$(BINARIES))
 
-all: $(BINARIES)
-	@echo "Built with '$(CXX) $(PEGTL_CXXSTD) -I. $(PEGTL_CPPFLAGS) $(PEGTL_CXXFLAGS)'."
-	@set -e; for T in $(UNIT_TESTS); do echo $$T; $$T < unit_tests/file_data.txt > /dev/null; done
-	@echo "All $(words $(UNIT_TESTS)) unit tests passed."
+.PHONY: all
+all: compile check
 
-clean:
-	rm -rf build/*
+.PHONY: compile
+compile: $(BINARIES)
 
-.SECONDARY:
+.PHONY: check
+check: $(UNIT_TESTS)
+	@set -e; for T in $(UNIT_TESTS); do echo $$T; $$T > /dev/null; done
 
-build/%.d: %.cc Makefile
+build/%.valgrind: build/%
+	valgrind --error-exitcode=1 --leak-check=full $<
+	@touch $@
+
+.PHONY: valgrind
+valgrind: $(UNIT_TESTS:%=%.valgrind)
+	@echo "All $(words $(UNIT_TESTS)) valgrind tests passed."
+
+build/%.cppcheck: %.hpp
+	cppcheck --error-exitcode=1 --inconclusive --force --std=c++11 $<
 	@mkdir -p $(@D)
-	$(CXX) $(PEGTL_CXXSTD) -I. $(PEGTL_CPPFLAGS) -MM -MQ $@ $< -o $@
+	@touch $@
 
-build/%: %.cc build/%.d
-	$(CXX) $(PEGTL_CXXSTD) -I. $(PEGTL_CPPFLAGS) $(PEGTL_CXXFLAGS) $< -o $@
+.PHONY: cppcheck
+cppcheck: $(HEADERS:%.hpp=build/%.cppcheck)
+	@echo "All $(words $(HEADERS)) cppcheck tests passed."
+
+build/%.clang-tidy: %
+	$(CLANG_TIDY) -extra-arg "-Iinclude" -extra-arg "-std=c++11" -checks=*,-fuchsia-*,-google-runtime-references,-google-runtime-int,-google-readability-todo,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-hicpp-no-array-decay,-hicpp-signed-bitwise,-modernize-raw-string-literal,-misc-sizeof-expression -warnings-as-errors=* $< 2>/dev/null
+	@mkdir -p $(@D)
+	@touch $@
+
+.PHONY: clang-tidy
+clang-tidy: $(HEADERS:%=build/%.clang-tidy) $(SOURCES:%=build/%.clang-tidy)
+	@echo "All $(words $(HEADERS) $(SOURCES)) clang-tidy tests passed."
+
+.PHONY: clean
+clean:
+	@rm -rf build
+	@find . -name '*~' -delete
+
+build/%.d: %.cpp Makefile
+	@mkdir -p $(@D)
+	$(CXX) $(CXXSTD) -Iinclude $(CPPFLAGS) -MM -MQ $@ $< -o $@
+
+build/%: %.cpp build/%.d
+	$(CXX) $(CXXSTD) -Iinclude $(CPPFLAGS) $(CXXFLAGS) $< -o $@
 
 ifeq ($(findstring $(MAKECMDGOALS),clean),)
 -include $(DEPENDS)

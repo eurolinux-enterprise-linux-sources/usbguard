@@ -16,10 +16,14 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
-#include <Rule.hpp>
-#include <RuleSet.hpp>
-#include <DeviceManager.hpp>
-#include <DeviceManagerHooks.hpp>
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
+#include "usbguard/Rule.hpp"
+#include "usbguard/RuleSet.hpp"
+#include "usbguard/DeviceManager.hpp"
+#include "usbguard/DeviceManagerHooks.hpp"
 
 namespace usbguard
 {
@@ -37,13 +41,13 @@ namespace usbguard
     void generate();
     const RuleSet& refRuleSet() const;
 
-    void dmHookDeviceEvent(DeviceManager::EventType event, Pointer<Device> device) override;
+    void dmHookDeviceEvent(DeviceManager::EventType event, std::shared_ptr<Device> device) override;
     uint32_t dmHookAssignID() override;
-    void dmHookDeviceException(const String& message) override;
+    void dmHookDeviceException(const std::string& message) override;
 
   private:
     RuleSet _ruleset;
-    Pointer<DeviceManager> _dm;
+    std::shared_ptr<DeviceManager> _dm;
 
     bool _with_hash;
     bool _hash_only;
@@ -53,3 +57,5 @@ namespace usbguard
     Rule::Target _catchall_target;
   };
 } /* namespace usbguard */
+
+/* vim: set ts=2 sw=2 et */

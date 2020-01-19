@@ -17,43 +17,57 @@
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
 #pragma once
-#include <build-config.h>
-#include "ConfigFile.hpp"
-#include <fstream>
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
 
-namespace usbguard {
+#include "usbguard/ConfigFile.hpp"
+#include "KeyValueParser.hpp"
+
+
+#include <fstream>
+#include <map>
+#include <string>
+#include <vector>
+#include <memory>
+
+namespace usbguard
+{
   class ConfigFilePrivate
   {
   public:
-    ConfigFilePrivate(ConfigFile& p_instance, const StringVector& known_names);
+    ConfigFilePrivate(ConfigFile& p_instance, const std::vector<std::string>& known_names);
     ~ConfigFilePrivate();
 
-    void open(const String& path);
+    void open(const std::string& path, bool readonly);
     void write();
     void close();
 
-    void setSettingValue(const String& name, String& value);
-    bool hasSettingValue(const String& name) const;
-    const String& getSettingValue(const String& name) const;
+    void setSettingValue(const std::string& name, std::string& value);
+    bool hasSettingValue(const std::string& name) const;
+    const std::string& getSettingValue(const std::string& name) const;
 
   protected:
     void parse();
-    bool checkNVPair(const String& name, const String& value) const;
+    bool checkNVPair(const std::string& name, const std::string& value) const;
 
   private:
-    struct NVPair
-    {
-      String name;
-      String value;
+    struct NVPair {
+      std::string name;
+      std::string value;
       size_t line_number;
     };
 
     ConfigFile& _p_instance;
-    String _path;
+    std::string _path;
     std::fstream _stream;
-    StringVector _lines;
-    StringKeyMap<NVPair> _settings;
+    std::vector<std::string> _lines;
+    std::map<std::string, NVPair> _settings;
     bool _dirty;
-    StringVector _known_names;
+    bool _readonly;
+    std::vector<std::string> _known_names;
   };
-}
+
+} /* namespace usbguard */
+
+/* vim: set ts=2 sw=2 et */

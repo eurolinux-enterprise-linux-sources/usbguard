@@ -16,12 +16,18 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
 #include "RulePrivate.hpp"
-#include "RuleParser.hpp"
-#include "Logger.hpp"
 #include "Common/Utility.hpp"
 
-namespace usbguard {
+#include "usbguard/RuleParser.hpp"
+#include "usbguard/Logger.hpp"
+
+namespace usbguard
+{
   RulePrivate::RulePrivate(Rule& p_instance)
     : //_p_instance(p_instance),
       _device_id("id"),
@@ -37,7 +43,6 @@ namespace usbguard {
     _rule_id = Rule::DefaultID;
     _target = Rule::Target::Invalid;
     _conditions_state = 0;
-    _timeout_seconds = 0;
   }
 
   RulePrivate::RulePrivate(Rule& p_instance, const RulePrivate& rhs)
@@ -60,7 +65,6 @@ namespace usbguard {
     _meta = rhs._meta;
     _rule_id = rhs._rule_id;
     _target = rhs._target;
-
     _device_id = rhs._device_id;
     _serial = rhs._serial;
     _name = rhs._name;
@@ -69,24 +73,24 @@ namespace usbguard {
     _via_port = rhs._via_port;
     _with_interface = rhs._with_interface;
     _conditions = rhs._conditions;
-
     _conditions_state = rhs._conditions_state;
-    _timeout_seconds = rhs._timeout_seconds;
-
     return *this;
 #if 0
+
     /* TODO */
     try {
       for (auto const& condition : rhs._conditions) {
         _conditions.push_back(condition->clone());
       }
     }
-    catch(...) {
+    catch (...) {
       for (auto const& condition : _conditions) {
         delete condition;
       }
+
       throw;
     }
+
 #endif
   }
 
@@ -94,7 +98,7 @@ namespace usbguard {
   {
   }
 
-  bool RulePrivate::appliesTo(Pointer<const Rule> rhs, bool parent_insensitive) const
+  bool RulePrivate::appliesTo(std::shared_ptr<const Rule> rhs, bool parent_insensitive) const
   {
     return appliesTo(*rhs, parent_insensitive);
   }
@@ -106,18 +110,17 @@ namespace usbguard {
      * a set defined by this rule.
      */
     USBGUARD_LOG(Trace) << "entry:"
-                        << " rhs=" << rhs.toString()
-                        << " parent_insensitive=" << parent_insensitive;
-
+      << " rhs=" << rhs.toString()
+      << " parent_insensitive=" << parent_insensitive;
     bool applies = false;
 
     if (!_device_id.appliesTo(rhs.internal()->_device_id) ||
-        !_serial.appliesTo(rhs.internal()->_serial) ||
-        !_name.appliesTo(rhs.internal()->_name) ||
-        !_hash.appliesTo(rhs.internal()->_hash) ||
-        !(parent_insensitive || _parent_hash.appliesTo(rhs.internal()->_parent_hash)) ||
-        !(parent_insensitive || _via_port.appliesTo(rhs.internal()->_via_port)) ||
-        !_with_interface.appliesTo(rhs.internal()->_with_interface)) {
+      !_serial.appliesTo(rhs.internal()->_serial) ||
+      !_name.appliesTo(rhs.internal()->_name) ||
+      !_hash.appliesTo(rhs.internal()->_hash) ||
+      !(parent_insensitive || _parent_hash.appliesTo(rhs.internal()->_parent_hash)) ||
+      !(parent_insensitive || _via_port.appliesTo(rhs.internal()->_via_port)) ||
+      !_with_interface.appliesTo(rhs.internal()->_with_interface)) {
       applies = false;
     }
     else {
@@ -125,17 +128,15 @@ namespace usbguard {
     }
 
     USBGUARD_LOG(Trace) << "return:"
-                        << " applies=" << applies;
-
+      << " applies=" << applies;
     return applies;
   }
 
   bool RulePrivate::appliesToWithConditions(const Rule& rhs, bool with_update)
   {
     USBGUARD_LOG(Trace) << "entry:"
-                        << " rhs=" << rhs.toString()
-                        << " with_updates=" << with_update;
-
+      << " rhs=" << rhs.toString()
+      << " with_updates=" << with_update;
     bool applies = false;
 
     if (appliesTo(rhs)) {
@@ -146,55 +147,56 @@ namespace usbguard {
     }
 
     USBGUARD_LOG(Trace) << "return:"
-                        << " applies=" << applies;
-
+      << " applies=" << applies;
     return applies;
   }
 
   bool RulePrivate::meetsConditions(const Rule& rhs, bool with_update)
   {
     USBGUARD_LOG(Trace) << "entry:"
-                        << " conditions=" << _conditions.count()
-                        << " rhs=" << rhs.toString()
-                        << " with_update=" << with_update;
+      << " conditions=" << _conditions.count()
+      << " rhs=" << rhs.toString()
+      << " with_update=" << with_update;
 
     if (with_update) {
       (void)updateConditionsState(rhs);
     }
 
     USBGUARD_LOG(Debug) << "set_operator=" << Rule::setOperatorToString(_conditions.setOperator());
-
     bool meets_conditions = false;
 
-    switch(_conditions.setOperator()) {
-      case Rule::SetOperator::OneOf:
-        meets_conditions = conditionsState() > 0;
-        break;
-      case Rule::SetOperator::NoneOf:
-        meets_conditions = conditionsState() == 0;
-        break;
-      case Rule::SetOperator::AllOf:
-      case Rule::SetOperator::Equals:
-      case Rule::SetOperator::EqualsOrdered:
-        meets_conditions = \
-          (conditionsState() == ((((uint64_t)1) << _conditions.count()) - 1));
-        break;
-      case Rule::SetOperator::Match:
-      default:
-        throw std::runtime_error("BUG: meetsConditions: invalid conditions set operator");
+    switch (_conditions.setOperator()) {
+    case Rule::SetOperator::OneOf:
+      meets_conditions = conditionsState() > 0;
+      break;
+
+    case Rule::SetOperator::NoneOf:
+      meets_conditions = conditionsState() == 0;
+      break;
+
+    case Rule::SetOperator::AllOf:
+    case Rule::SetOperator::Equals:
+    case Rule::SetOperator::EqualsOrdered:
+      meets_conditions = \
+        (conditionsState() == ((((uint64_t)1) << _conditions.count()) - 1));
+      break;
+
+    case Rule::SetOperator::Match:
+    default:
+      throw std::runtime_error("BUG: meetsConditions: invalid conditions set operator");
     }
 
     USBGUARD_LOG(Trace) << "return:"
-                        << " meets_conditions=" << meets_conditions;
-
+      << " meets_conditions=" << meets_conditions;
     return meets_conditions;
   }
 
-  void RulePrivate::initConditions(Interface * const interface)
+  void RulePrivate::initConditions(Interface* const interface)
   {
     for (auto& condition : _conditions.values()) {
       condition->init(interface);
     }
+
     /* FIXME: prevent leaks when init() throws an exception */
   }
 
@@ -214,13 +216,13 @@ namespace usbguard {
       if (i >= (sizeof updated_state * 8)) {
         throw std::runtime_error("BUG: updateConditionsState: too many conditions");
       }
+
       updated_state |= uint64_t(condition->evaluate(rhs)) << i;
       ++i;
     }
 
     USBGUARD_LOG(Debug) << "current=" << conditionsState()
-                        << " updated=" << updated_state;
-
+      << " updated=" << updated_state;
     bool retval = false;
 
     if (updated_state != conditionsState()) {
@@ -232,8 +234,7 @@ namespace usbguard {
     }
 
     USBGUARD_LOG(Trace) << "return:"
-                        << " retval=" << retval;
-
+      << " retval=" << retval;
     return retval;
   }
 
@@ -247,11 +248,6 @@ namespace usbguard {
     _conditions_state = state;
   }
 
-  uint32_t RulePrivate::getTimeoutSeconds() const
-  {
-    return _timeout_seconds;
-  }
-
   void RulePrivate::setRuleID(uint32_t rule_id)
   {
     _rule_id = rule_id;
@@ -261,7 +257,7 @@ namespace usbguard {
   {
     return _rule_id;
   }
- 
+
   void RulePrivate::setTarget(Rule::Target target)
   {
     _target = target;
@@ -292,102 +288,102 @@ namespace usbguard {
     return _device_id;
   }
 
-  void RulePrivate::setSerial(const String& value)
+  void RulePrivate::setSerial(const std::string& value)
   {
     _serial.set(value);
   }
 
-  const String& RulePrivate::getSerial() const
+  const std::string& RulePrivate::getSerial() const
   {
     return _serial.get();
   }
 
-  const Rule::Attribute<String>& RulePrivate::attributeSerial() const
+  const Rule::Attribute<std::string>& RulePrivate::attributeSerial() const
   {
     return _serial;
   }
 
-  Rule::Attribute<String>& RulePrivate::attributeSerial()
+  Rule::Attribute<std::string>& RulePrivate::attributeSerial()
   {
     return _serial;
   }
 
-  void RulePrivate::setName(const String& value)
+  void RulePrivate::setName(const std::string& value)
   {
     _name.set(value);
   }
 
-  const String& RulePrivate::getName() const
+  const std::string& RulePrivate::getName() const
   {
     return _name.get();
   }
 
-  const Rule::Attribute<String>& RulePrivate::attributeName() const
+  const Rule::Attribute<std::string>& RulePrivate::attributeName() const
   {
     return _name;
   }
 
-  Rule::Attribute<String>& RulePrivate::attributeName()
+  Rule::Attribute<std::string>& RulePrivate::attributeName()
   {
     return _name;
   }
 
-  void RulePrivate::setHash(const String& value)
+  void RulePrivate::setHash(const std::string& value)
   {
     _hash.set(value);
   }
 
-  const String& RulePrivate::getHash() const
+  const std::string& RulePrivate::getHash() const
   {
     return _hash.get();
   }
 
-  const Rule::Attribute<String>& RulePrivate::attributeHash() const
+  const Rule::Attribute<std::string>& RulePrivate::attributeHash() const
   {
     return _hash;
   }
 
-  Rule::Attribute<String>& RulePrivate::attributeHash()
+  Rule::Attribute<std::string>& RulePrivate::attributeHash()
   {
     return _hash;
   }
 
-  void RulePrivate::setParentHash(const String& value)
+  void RulePrivate::setParentHash(const std::string& value)
   {
     _parent_hash.set(value);
   }
 
-  const String& RulePrivate::getParentHash() const
+  const std::string& RulePrivate::getParentHash() const
   {
     return _parent_hash.get();
   }
 
-  const Rule::Attribute<String>& RulePrivate::attributeParentHash() const
+  const Rule::Attribute<std::string>& RulePrivate::attributeParentHash() const
   {
     return _parent_hash;
   }
 
-  Rule::Attribute<String>& RulePrivate::attributeParentHash()
+  Rule::Attribute<std::string>& RulePrivate::attributeParentHash()
   {
     return _parent_hash;
   }
 
-  void RulePrivate::setViaPort(const String& value)
+  void RulePrivate::setViaPort(const std::string& value)
   {
     _via_port.set(value);
   }
 
-  const String& RulePrivate::getViaPort() const
+  const std::string& RulePrivate::getViaPort() const
   {
     return _via_port.get();
   }
 
-  const Rule::Attribute<String>& RulePrivate::attributeViaPort() const
+  const Rule::Attribute<std::string>& RulePrivate::attributeViaPort() const
   {
     return _via_port;
   }
 
-  Rule::Attribute<String>& RulePrivate::attributeViaPort()
+  Rule::Attribute<std::string>& RulePrivate::attributeViaPort()
   {
     return _via_port;
   }
@@ -412,13 +408,8 @@ namespace usbguard {
     return _conditions;
   }
 
-  void RulePrivate::setTimeoutSeconds(uint32_t timeout_seconds)
-  {
-    _timeout_seconds = timeout_seconds;
-  }
-
   template<class ValueType>
-  static void toString_appendNonEmptyAttribute(String& rule_string, const Rule::Attribute<ValueType>& attribute)
+  static void toString_appendNonEmptyAttribute(std::string& rule_string, const Rule::Attribute<ValueType>& attribute)
   {
     if (attribute.empty()) {
       return;
@@ -426,17 +417,17 @@ namespace usbguard {
 
     rule_string.append(" ");
     rule_string.append(attribute.toRuleString());
-
     return;
   }
 
-  String RulePrivate::toString(bool invalid) const
+  std::string RulePrivate::toString(bool invalid) const
   {
-    String rule_string;
+    std::string rule_string;
 
     try {
       rule_string.append(Rule::targetToString(_target));
-    } catch(...) {
+    }
+    catch (...) {
       if (invalid) {
         rule_string.append("<invalid>");
       }
@@ -453,7 +444,6 @@ namespace usbguard {
     toString_appendNonEmptyAttribute(rule_string, _via_port);
     toString_appendNonEmptyAttribute(rule_string, _with_interface);
     toString_appendNonEmptyAttribute(rule_string, _conditions);
-
     return rule_string;
   }
 
@@ -467,7 +457,7 @@ namespace usbguard {
     return _meta;
   }
 
-  Rule RulePrivate::fromString(const String& rule_string)
+  Rule RulePrivate::fromString(const std::string& rule_string)
   {
     return parseRuleFromString(rule_string);
   }
@@ -478,10 +468,14 @@ namespace usbguard {
       ++_meta.counter_evaluated;
       _meta.tp_last_evaluated = std::chrono::steady_clock::now();
     }
+
     if (applied) {
       ++_meta.counter_applied;
       _meta.tp_last_applied = std::chrono::steady_clock::now();
     }
+
     return;
   }
 } /* namespace usbguard */
+
+/* vim: set ts=2 sw=2 et */

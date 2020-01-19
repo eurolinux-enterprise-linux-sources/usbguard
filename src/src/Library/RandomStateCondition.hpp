@@ -17,9 +17,15 @@
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
 #pragma once
-#include "Typedefs.hpp"
-#include "RuleCondition.hpp"
-#include "Rule.hpp"
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
+#include "usbguard/Typedefs.hpp"
+#include "usbguard/Rule.hpp"
+
+#include "usbguard/RuleCondition.hpp"
+
 #include <random>
 
 namespace usbguard
@@ -27,10 +33,10 @@ namespace usbguard
   class RandomStateCondition : public RuleConditionBase
   {
   public:
-    RandomStateCondition(const String& true_probability, bool negated = false);
+    RandomStateCondition(const std::string& true_probability, bool negated = false);
     RandomStateCondition(const RandomStateCondition& rhs);
     bool update(const Rule& rule);
-    RuleConditionBase * clone() const;
+    RuleConditionBase* clone() const;
   private:
     std::random_device _rng_device;
     std::mt19937 _rng_gen;
@@ -39,3 +45,4 @@ namespace usbguard
   };
 } /* namespace usbguard */
 
+/* vim: set ts=2 sw=2 et */

@@ -16,13 +16,17 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
 #include "PolicyGenerator.hpp"
 
 namespace usbguard
 {
 
   PolicyGenerator::PolicyGenerator()
-   : _ruleset(nullptr)
+    : _ruleset(nullptr)
   {
     _with_hash = true;
     _hash_only = false;
@@ -77,7 +81,7 @@ namespace usbguard
     _catchall_target = target;
   }
 
-  void PolicyGenerator::dmHookDeviceEvent(DeviceManager::EventType event, Pointer<Device> device)
+  void PolicyGenerator::dmHookDeviceEvent(DeviceManager::EventType event, std::shared_ptr<Device> device)
   {
     if (event != DeviceManager::EventType::Present) {
       /*
@@ -87,6 +91,7 @@ namespace usbguard
     }
 
     bool port_specific = _port_specific;
+
     /*
      * If the the global "port specific" flag isn't
      * set, check the "no iSerial port specific" flag
@@ -96,11 +101,11 @@ namespace usbguard
       port_specific = device->getSerial().empty();
     }
 
-    Pointer<Rule> rule = device->getDeviceRule(/*include_port=*/port_specific);
+    std::shared_ptr<Rule> rule = device->getDeviceRule(/*include_port=*/port_specific);
 
     /* Remove everything but the hash value for hash-only rules */
     if (_hash_only) {
-      Pointer<Rule> rule_hashonly(new Rule());
+      std::shared_ptr<Rule> rule_hashonly(new Rule());
       rule_hashonly->setRuleID(rule->getRuleID());
       rule_hashonly->setHash(rule->getHash());
       rule_hashonly->setParentHash(rule->getParentHash());
@@ -127,8 +132,10 @@ namespace usbguard
     return _ruleset.assignID();
   }
 
-  void PolicyGenerator::dmHookDeviceException(const String& message)
+  void PolicyGenerator::dmHookDeviceException(const std::string& message)
   {
     USBGUARD_LOG(Error) << message;
   }
 } /* namespace usbguard */
+
+/* vim: set ts=2 sw=2 et */

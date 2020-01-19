@@ -16,9 +16,14 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
 #include "IPCClientPrivate.hpp"
 #include "IPCPrivate.hpp"
-#include "Logger.hpp"
+
+#include "usbguard/Logger.hpp"
 
 #include <stdint.h>
 #include <unistd.h>
@@ -27,16 +32,17 @@
 
 namespace usbguard
 {
-  int32_t IPCClientPrivate::qbPollWakeupFn(int32_t fd, int32_t revents, void *data)
+  int32_t IPCClientPrivate::qbPollWakeupFn(int32_t fd, int32_t revents, void* data)
   {
     USBGUARD_LOG(Trace) << "fd=" << fd
-                        << " revents=" << revents
-                        << " data=" << data;
+      << " revents=" << revents
+      << " data=" << data;
     uint64_t one = 0;
+
     if (read(fd, &one, sizeof one) != sizeof one) {
       USBGUARD_LOG(Warning) << "IPC client: "
-                            << "Failed to read wakeup event: "
-                            << "errno=" << errno;
+        << "Failed to read wakeup event: "
+        << "errno=" << errno;
       return -1;
     }
     else {
@@ -44,12 +50,12 @@ namespace usbguard
     }
   }
 
-  int32_t IPCClientPrivate::qbIPCMessageProcessFn(int32_t fd, int32_t revents, void *data)
+  int32_t IPCClientPrivate::qbIPCMessageProcessFn(int32_t fd, int32_t revents, void* data)
   {
     USBGUARD_LOG(Trace) << "fd=" << fd
-                        << " revents=" << revents
-                        << " data=" << data;
-    IPCClientPrivate *client = static_cast<IPCClientPrivate*>(data);
+      << " revents=" << revents
+      << " data=" << data;
+    IPCClientPrivate* client = static_cast<IPCClientPrivate*>(data);
     client->processReceiveEvent();
     return 0;
   }
@@ -61,10 +67,9 @@ namespace usbguard
     _qb_conn = nullptr;
     _qb_fd = -1;
     USBGUARD_SYSCALL_THROW("IPC client initialization",
-        (_wakeup_fd = eventfd(0, 0)) < 0);
+      (_wakeup_fd = eventfd(0, 0)) < 0);
     _qb_loop = qb_loop_create();
     qb_loop_poll_add(_qb_loop, QB_LOOP_HIGH, _wakeup_fd, POLLIN, NULL, qbPollWakeupFn);
-
     registerHandler<IPC::getParameter>(&IPCClientPrivate::handleMethodResponse);
     registerHandler<IPC::setParameter>(&IPCClientPrivate::handleMethodResponse);
     registerHandler<IPC::listRules>(&IPCClientPrivate::handleMethodResponse);
@@ -80,7 +85,7 @@ namespace usbguard
       try {
         connect();
       }
-      catch(...) {
+      catch (...) {
         destruct();
         throw;
       }
@@ -104,7 +109,6 @@ namespace usbguard
   void IPCClientPrivate::connect()
   {
     USBGUARD_LOG(Trace);
-
     _qb_conn = qb_ipcc_connect("usbguard", 1<<20);
 
     if (_qb_conn == nullptr) {
@@ -129,10 +133,10 @@ namespace usbguard
   void IPCClientPrivate::disconnect(bool exception_initiated, const IPCException& exception, bool do_wait)
   {
     USBGUARD_LOG(Trace) << "exception_initiated=" << exception_initiated
-                        << " exception=" << exception.message()
-                        << " do_wait=" << do_wait;
+      << " exception=" << exception.message()
+      << " do_wait=" << do_wait;
     USBGUARD_LOG(Trace) << "_qb_conn=" << _qb_conn
-                        << " _qb_fd=" << _qb_fd;
+      << " _qb_fd=" << _qb_fd;
 
     if (_qb_conn != nullptr && _qb_fd >= 0) {
       qb_loop_poll_del(_qb_loop, _qb_fd);
@@ -142,6 +146,9 @@ namespace usbguard
       stop(do_wait);
       USBGUARD_LOG(Trace) << "Signaling IPCDisconnected";
       _p_instance.IPCDisconnected(/*exception_initiated=*/true, exception);
+    }
+    else if (_thread.running()) {
+      stop(do_wait);
     }
   }
 
@@ -174,7 +181,7 @@ namespace usbguard
   {
     const uint64_t one = 1;
     USBGUARD_SYSCALL_THROW("IPC client",
-                           write(_wakeup_fd, &one, sizeof one) != sizeof one);
+      write(_wakeup_fd, &one, sizeof one) != sizeof one);
   }
 
   void IPCClientPrivate::stop(bool do_wait)
@@ -183,6 +190,7 @@ namespace usbguard
     _thread.stop(/*do_wait=*/false);
     qb_loop_stop(_qb_loop);
     wakeup();
+
     if (do_wait) {
       wait();
     }
@@ -204,23 +212,18 @@ namespace usbguard
 
     const uint64_t id = generateMessageID();
     IPC::setMessageHeaderID(message, id);
-
     std::string payload;
     message.SerializeToString(&payload);
-
     struct qb_ipc_request_header hdr;
     hdr.id = QB_IPC_MSG_USER_START + IPC::messageTypeNameToNumber(message.GetTypeName());
     hdr.size = sizeof hdr + payload.size();
-
     struct iovec iov[2];
     iov[0].iov_base = &hdr;
     iov[0].iov_len = sizeof hdr;
-    iov[1].iov_base = (void *)payload.data();
+    iov[1].iov_base = (void*)payload.data();
     iov[1].iov_len = payload.size();
-
     /* Lock the return value slot map */
     std::unique_lock<std::mutex> return_map_lock(_return_mutex);
-
     /*
      * Create the promise and future objects.
      * The promise will be fullfiled by the message
@@ -229,20 +232,16 @@ namespace usbguard
      */
     auto& promise = _return_map[id];
     auto future = promise.get_future();
-
     qb_ipcc_sendv(_qb_conn, iov, 2);
-
-    /* 
+    /*
      * Unlock the return value map so that the message
      * processing handler aren't blocked.
      */
     return_map_lock.unlock();
-
     /* Wait for some time for the reply to be received */
-    const std::chrono::milliseconds timeout_ms(5*1000); /* TODO: make this configurable */
+    const std::chrono::milliseconds timeout_ms(15*1000); /* TODO: make this configurable */
     const bool timed_out = \
       future.wait_for(timeout_ms) == std::future_status::timeout;
-
     IPC::MessagePointer response;
 
     if (!timed_out) {
@@ -272,22 +271,23 @@ namespace usbguard
   void IPCClientPrivate::processReceiveEvent()
   {
     USBGUARD_LOG(Trace);
+
     try {
       const std::string buffer = receive();
       process(buffer);
     }
-    catch(const IPCException& exception) {
+    catch (const IPCException& exception) {
       disconnect(/*exception_initiated=*/true, exception);
     }
-    catch(const Exception& exception) {
+    catch (const Exception& exception) {
       const IPCException ipc_exception(exception);
       disconnect(/*exception_initiated=*/true, ipc_exception);
     }
-    catch(const std::exception& exception) {
+    catch (const std::exception& exception) {
       const IPCException ipc_exception("IPC receive event", "", exception.what());
       disconnect(/*exception_initiated=*/true, ipc_exception);
     }
-    catch(...) {
+    catch (...) {
       const IPCException ipc_exception("IPC receive event", "BUG", "Unknown exception");
       disconnect(/*exception_initiated=*/true, ipc_exception);
     }
@@ -296,10 +296,8 @@ namespace usbguard
   std::string IPCClientPrivate::receive()
   {
     USBGUARD_LOG(Trace);
-
     const size_t buffer_size_max = 1<<20;
     std::string buffer(buffer_size_max, 0);
-
     const ssize_t recv_size = \
       qb_ipcc_event_recv(_qb_conn, &buffer[0], /*msg_len=*/buffer_size_max, /*ms_timeout=*/500);
 
@@ -307,6 +305,7 @@ namespace usbguard
       disconnect();
       throw Exception("IPC receive", "connection", "Receive error");
     }
+
     if (recv_size < (ssize_t)sizeof(struct qb_ipc_response_header)) {
       disconnect();
       throw Exception("IPC receive", "message", "Message too small");
@@ -320,14 +319,14 @@ namespace usbguard
   void IPCClientPrivate::process(const std::string& buffer)
   {
     USBGUARD_LOG(Trace) << "buffer=" << &buffer;
-
-    const struct qb_ipc_response_header *hdr = \
-      reinterpret_cast<const struct qb_ipc_response_header *>(buffer.data());
+    const struct qb_ipc_response_header* hdr = \
+        reinterpret_cast<const struct qb_ipc_response_header*>(buffer.data());
 
     if ((size_t)hdr->size != buffer.size()) {
       disconnect();
       throw Exception("IPC receive", "message header", "Invalid size value");
     }
+
     if (hdr->id < QB_IPC_MSG_USER_START) {
       disconnect();
       throw Exception("IPC receive", "message header", "Invalid payload type value");
@@ -335,24 +334,27 @@ namespace usbguard
 
     const uint32_t payload_type = hdr->id - QB_IPC_MSG_USER_START;
     const std::string payload = buffer.substr(sizeof(struct qb_ipc_response_header));
-
     handleIPCPayload(payload_type, payload);
   }
 
   void IPCClientPrivate::handleIPCPayload(const uint32_t payload_type, const std::string& payload)
   {
     USBGUARD_LOG(Trace) << "payload_type=" << payload_type
-                        << " payload=" << &payload;
+      << " payload=" << &payload;
 
     try {
       auto& handler = _handlers.at(payload_type);
       auto message = handler.payloadToMessage(payload);
+      USBGUARD_LOG(Debug) << "Message: " << message->DebugString();
       handler.run(message);
     }
-    catch(const IPCException& exception) {
+    catch (const IPCException& exception) {
       throw;
     }
-    catch(...) {
+    catch (const std::exception& exception) {
+      throw Exception("IPC connection", "message", exception.what());
+    }
+    catch (...) {
       throw Exception("IPC connection", "message", "Unknown payload type");
     }
   }
@@ -379,9 +381,7 @@ namespace usbguard
     IPC::appendRule message_out;
     message_out.mutable_request()->set_rule(rule_spec);
     message_out.mutable_request()->set_parent_id(parent_id);
-
     auto message_in = qbIPCSendRecvMessage(message_out);
-
     return message_in->response().id();
   }
 
@@ -389,7 +389,6 @@ namespace usbguard
   {
     IPC::removeRule message_out;
     message_out.mutable_request()->set_id(id);
-
     auto message_in = qbIPCSendRecvMessage(message_out);
   }
 
@@ -397,12 +396,9 @@ namespace usbguard
   {
     IPC::listRules message_out;
     message_out.mutable_request()->set_query(query);
-
     auto message_in = qbIPCSendRecvMessage(message_out);
-
     const Rule::Target default_target = \
       Rule::targetFromInteger(message_in->response().default_target());
-
     RuleSet rule_set(&_p_instance);
     rule_set.setDefaultTarget(default_target);
 
@@ -421,9 +417,7 @@ namespace usbguard
     message_out.mutable_request()->set_id(id);
     message_out.mutable_request()->set_target(Rule::targetToInteger(target));
     message_out.mutable_request()->set_permanent(permanent);
-
     auto message_in = qbIPCSendRecvMessage(message_out);
-
     return message_in->response().rule_id();
   }
 
@@ -431,7 +425,6 @@ namespace usbguard
   {
     IPC::listDevices message_out;
     message_out.mutable_request()->set_query(query);
-
     auto message_in = qbIPCSendRecvMessage(message_out);
     std::vector<Rule> devices;
 
@@ -460,7 +453,7 @@ namespace usbguard
       auto& return_promise = _return_map.at(id);
       return_promise.set_value(std::move(message_in));
     }
-    catch(...) {
+    catch (...) {
       throw IPCException("IPC method response", "message", "Unexpected method call response", id);
     }
   }
@@ -468,48 +461,50 @@ namespace usbguard
   void IPCClientPrivate::handleException(IPC::MessagePointer& message_in, IPC::MessagePointer& message_out)
   {
     (void)message_out;
-    const IPC::Exception * const exception = \
+    const IPC::Exception* const exception = \
       reinterpret_cast<const IPC::Exception*>(message_in.get());
 
     if (exception->has_request_id()) {
       const uint64_t id = exception->request_id();
+
       if (id > 0) {
         try {
           auto& return_promise = _return_map.at(id);
           return_promise.set_value(std::move(message_in));
         }
-        catch(...) {
+        catch (...) {
           throw IPCException("IPC exception response", "message", "Unexpected method response exception", id);
         }
       }
     }
+
     _p_instance.ExceptionMessage(exception->context(),
-                                 exception->object(),
-                                 exception->reason());
+      exception->object(),
+      exception->reason());
   }
 
   void IPCClientPrivate::handleDevicePresenceChangedSignal(IPC::MessagePointer& message_in, IPC::MessagePointer& message_out)
   {
     (void)message_out;
-    const IPC::DevicePresenceChangedSignal * const signal =\
+    const IPC::DevicePresenceChangedSignal* const signal =\
       reinterpret_cast<const IPC::DevicePresenceChangedSignal*>(message_in.get());
-
     _p_instance.DevicePresenceChanged(signal->id(),
-                                      DeviceManager::eventTypeFromInteger(signal->event()),
-                                      Rule::targetFromInteger(signal->target()),
-                                      signal->device_rule());
+      DeviceManager::eventTypeFromInteger(signal->event()),
+      Rule::targetFromInteger(signal->target()),
+      signal->device_rule());
   }
 
   void IPCClientPrivate::handleDevicePolicyChangedSignal(IPC::MessagePointer& message_in, IPC::MessagePointer& message_out)
   {
     (void)message_out;
-    const IPC::DevicePolicyChangedSignal * const signal = \
+    const IPC::DevicePolicyChangedSignal* const signal = \
       reinterpret_cast<const IPC::DevicePolicyChangedSignal*>(message_in.get());
-
     _p_instance.DevicePolicyChanged(signal->id(),
-                                    Rule::targetFromInteger(signal->target_old()),
-                                    Rule::targetFromInteger(signal->target_new()),
-                                    signal->device_rule(),
-                                    signal->rule_id());
+      Rule::targetFromInteger(signal->target_old()),
+      Rule::targetFromInteger(signal->target_new()),
+      signal->device_rule(),
+      signal->rule_id());
   }
 } /* namespace usbguard */
+
+/* vim: set ts=2 sw=2 et */

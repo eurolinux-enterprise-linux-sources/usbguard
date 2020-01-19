@@ -15,6 +15,7 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##
 ## Authors: Daniel Kopecek <dkopecek@redhat.com>
+##          Jiri Vymazal   <jvymazal@redhat.com>
 ##
 SUBDIRS=src/Tests/
 
@@ -24,7 +25,13 @@ EXTRA_DIST =\
 	usbguard-daemon.conf.in \
 	usbguard.service.in \
 	VERSION \
-	CHANGELOG.md
+	CHANGELOG.md \
+	src/astylerc \
+	scripts/usbguard-zsh-completion \
+	scripts/modeline.vim \
+	scripts/astyle.sh \
+	scripts/reformat-sources.sh \
+	scripts/usb-descriptor-collect.sh
 
 BUILT_SOURCES=\
 	src/build-config.h
@@ -45,36 +52,32 @@ DISTCLEANFILES=\
 
 CLEANFILES=
 
-ROFF_PAGES=\
-	doc/usbguard.1.roff \
-	doc/usbguard-dbus.8.roff \
-	doc/usbguard-applet-qt.1.roff \
-	doc/usbguard-daemon.8.roff \
-	doc/usbguard-daemon.conf.5.roff \
-	doc/usbguard-rules.conf.5.roff
+man_ADOC_FILES=\
+	doc/man/usbguard.1.adoc \
+	doc/man/usbguard-dbus.8.adoc \
+	doc/man/usbguard-applet-qt.1.adoc \
+	doc/man/usbguard-daemon.8.adoc \
+	doc/man/usbguard-daemon.conf.5.adoc \
+	doc/man/usbguard-rules.conf.5.adoc
 
-MARKDOWN_PAGES=$(ROFF_PAGES:.roff=.md)
+man_ROFF_FILES=\
+	$(man_ADOC_FILES:.adoc=.roff)
 
 EXTRA_DIST+=\
-	$(ROFF_PAGES:.roff=) \
-	$(MARKDOWN_PAGES)
-
-BUILT_SOURCES+=\
-	$(ROFF_PAGES)
+	$(man_ADOC_FILES)
 
 CLEANFILES+=\
-	$(ROFF_PAGES) \
-        $(ROFF_PAGES:.roff=)
+	$(man_ROFF_FILES) \
+	$(man_ROFF_FILES:.roff=)
 
-if GENERATE_MANPAGES
-$(top_builddir)/%.roff: %.md
+if DOCS_ENABLED
+BUILT_SOURCES+=\
+	$(man_ROFF_FILES)
+
+$(top_builddir)/%.roff: %.adoc
 	$(MKDIR_P) $$(dirname $@)
-	$(PANDOC) -s -t man $^ -o $(top_builddir)/$@
-	$(INSTALL) -m 644 $(top_builddir)/$@ $(top_builddir)/$(@:.roff=)
-else
-$(top_builddir)/%.roff: %.md
-	$(INSTALL) -D -m 644 $(^:.md=) $(top_builddir)/$@
-	$(INSTALL) -D -m 644 $(top_builddir)/$@ $(top_builddir)/$(@:.roff=)
+	$(A2X) -v -f manpage $^ -D $(top_builddir)/$$(dirname $@)
+	$(INSTALL) -m 644 $(top_builddir)/$(@:.roff=) $(top_builddir)/$@
 endif
 
 install-data-hook: install-daemon-conf install-systemd-service install-data-dbus
@@ -126,19 +129,25 @@ install-systemd-service:
 uninstall-systemd-service:
 endif
 
+if DOCS_ENABLED
 man8_MANS=\
-	$(top_builddir)/doc/usbguard-daemon.8
+	$(top_builddir)/doc/man/usbguard-daemon.8
 
 man5_MANS=\
-	$(top_builddir)/doc/usbguard-daemon.conf.5 \
-	$(top_builddir)/doc/usbguard-rules.conf.5
+	$(top_builddir)/doc/man/usbguard-daemon.conf.5 \
+	$(top_builddir)/doc/man/usbguard-rules.conf.5
 
 man1_MANS=\
-	$(top_builddir)/doc/usbguard.1
+	$(top_builddir)/doc/man/usbguard.1
+else
+man8_MANS=
+man5_MANS=
+man1_MANS=
+endif
 
 AM_CPPFLAGS=\
 	-I$(top_srcdir)/src \
-	-I$(top_srcdir)/src/Library
+	-I$(top_srcdir)/src/Library/public
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libusbguard.pc
@@ -150,22 +159,28 @@ libusbguard_la_CPPFLAGS=\
 	-fPIC \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/Library \
+	-I$(top_srcdir)/src/Library/public \
 	-I$(top_builddir)/src/Library/IPC \
+	${BOOST_CPPFLAGS} \
 	@qb_CFLAGS@ \
 	@protobuf_CFLAGS@ \
 	@crypto_CFLAGS@ \
-	@pegtl_CFLAGS@
+	@pegtl_CFLAGS@ \
+	@umockdev_CFLAGS@
 
 libusbguard_la_LDFLAGS=\
 	-no-undefined \
-	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
+	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
+	${BOOST_LDFLAGS}
 
 libusbguard_la_LIBADD=\
 	@qb_LIBS@ \
 	@protobuf_LIBS@ \
 	@crypto_LIBS@ \
 	@pegtl_LIBS@ \
-	@atomic_LIBS@
+	@atomic_LIBS@ \
+	@umockdev_LIBS@ \
+	${BOOST_IOSTREAMS_LIB}
 
 EXTRA_DIST+=\
 	src/Library/IPC/Devices.proto \
@@ -196,94 +211,100 @@ CLEANFILES+=\
 	$(nodist_libusbguard_la_SOURCES)
 
 libusbguard_la_SOURCES=\
-	src/Common/Thread.hpp \
 	src/Common/ByteOrder.hpp \
-	src/Common/Utility.hpp \
-	src/Common/Utility.cpp \
 	src/Common/FDInputStream.hpp \
-	src/Library/ConfigFile.cpp \
+	src/Common/Thread.hpp \
+	src/Common/Utility.cpp \
+	src/Common/Utility.hpp \
+	src/Library/AllowedMatchesCondition.cpp \
+	src/Library/AllowedMatchesCondition.hpp \
+	src/Library/Base64.cpp \
+	src/Library/Base64.hpp \
 	src/Library/ConfigFilePrivate.cpp \
 	src/Library/ConfigFilePrivate.hpp \
-	src/Library/IPCPrivate.hpp \
-	src/Library/IPCPrivate.cpp \
-	src/Library/IPCClient.cpp \
-	src/Library/IPCClientPrivate.hpp \
-	src/Library/IPCClientPrivate.cpp \
-	src/Library/IPCServer.cpp \
-	src/Library/IPCServerPrivate.hpp \
-	src/Library/IPCServerPrivate.cpp \
-	src/Library/USB.cpp \
-	src/Library/Rule.cpp \
-	src/Library/RuleParser.cpp \
-	src/Library/RuleParser.hpp \
-	src/Library/RuleParser/Grammar.hpp \
-	src/Library/RuleParser/Actions.hpp \
-	src/Library/RulePrivate.cpp \
-	src/Library/RulePrivate.hpp \
-	src/Library/RuleSet.cpp \
-	src/Library/RuleSetPrivate.cpp \
-	src/Library/RuleSetPrivate.hpp \
-	src/Library/Typedefs.cpp \
-	src/Library/DeviceManagerHooks.cpp \
-	src/Library/Device.cpp \
-	src/Library/DevicePrivate.hpp \
-	src/Library/DevicePrivate.cpp \
-	src/Library/DeviceManager.cpp \
-	src/Library/DeviceManagerPrivate.hpp \
 	src/Library/DeviceManagerPrivate.cpp \
-	src/Library/Logger.cpp \
-	src/Library/Init.cpp \
-	src/Library/RuleCondition.hpp \
-	src/Library/RuleCondition.cpp \
-	src/Library/AllowedMatchesCondition.hpp \
-	src/Library/AllowedMatchesCondition.cpp \
-	src/Library/FixedStateCondition.hpp \
+	src/Library/DeviceManagerPrivate.hpp \
+	src/Library/DevicePrivate.cpp \
+	src/Library/DevicePrivate.hpp \
 	src/Library/FixedStateCondition.cpp \
-	src/Library/RandomStateCondition.hpp \
-	src/Library/RandomStateCondition.cpp \
-	src/Library/LocaltimeCondition.hpp \
+	src/Library/FixedStateCondition.hpp \
+	src/Library/Hash.cpp \
+	src/Library/Hash.hpp \
+	src/Library/IPCClientPrivate.cpp \
+	src/Library/IPCClientPrivate.hpp \
+	src/Library/IPCPrivate.cpp \
+	src/Library/IPCPrivate.hpp \
+	src/Library/IPCServerPrivate.cpp \
+	src/Library/IPCServerPrivate.hpp \
+	src/Library/Init.cpp \
+	src/Library/KeyValueParser.cpp \
+	src/Library/KeyValueParser.hpp \
 	src/Library/LocaltimeCondition.cpp \
+	src/Library/LocaltimeCondition.hpp \
+	src/Library/RandomStateCondition.cpp \
+	src/Library/RandomStateCondition.hpp \
 	src/Library/RuleAppliedCondition.cpp \
 	src/Library/RuleAppliedCondition.hpp \
 	src/Library/RuleEvaluatedCondition.cpp \
 	src/Library/RuleEvaluatedCondition.hpp \
-	src/Library/Utility.cpp \
-	src/Library/Base64.cpp \
-	src/Library/Base64.hpp \
-	src/Library/Hash.cpp \
-	src/Library/Hash.hpp \
-	src/Library/UEvent.hpp \
-	src/Library/UEvent.cpp \
-	src/Library/UEventParser.hpp \
-	src/Library/UEventParser.cpp \
-	src/Library/UEventDeviceManager.hpp \
-	src/Library/UEventDeviceManager.cpp \
-	src/Library/SysFSDevice.hpp \
+	src/Library/RuleParser/Actions.hpp \
+	src/Library/RuleParser/Grammar.hpp \
+	src/Library/RulePrivate.cpp \
+	src/Library/RulePrivate.hpp \
+	src/Library/RuleSetPrivate.cpp \
+	src/Library/RuleSetPrivate.hpp \
 	src/Library/SysFSDevice.cpp \
-	src/Library/USBGuard.cpp \
-	src/Library/Policy.cpp \
-	src/Library/Audit.cpp \
-	src/Library/Audit.hpp
+	src/Library/SysFSDevice.hpp \
+	src/Library/UEvent.cpp \
+	src/Library/UEvent.hpp \
+	src/Library/UEventDeviceManager.cpp \
+	src/Library/UEventDeviceManager.hpp \
+	src/Library/UEventParser.cpp \
+	src/Library/UEventParser.hpp \
+	src/Library/UMockdevDeviceManager.cpp \
+	src/Library/UMockdevDeviceManager.hpp \
+	src/Library/UMockdevDeviceDefinition.cpp \
+	src/Library/UMockdevDeviceDefinition.hpp \
+	src/Library/Utility.cpp \
+	src/Library/Utility.hpp \
+	src/Library/public/usbguard/Audit.cpp \
+	src/Library/public/usbguard/Audit.hpp \
+	src/Library/public/usbguard/ConfigFile.cpp \
+	src/Library/public/usbguard/Device.cpp \
+	src/Library/public/usbguard/DeviceManager.cpp \
+	src/Library/public/usbguard/DeviceManagerHooks.cpp \
+	src/Library/public/usbguard/IPCClient.cpp \
+	src/Library/public/usbguard/IPCServer.cpp \
+	src/Library/public/usbguard/Logger.cpp \
+	src/Library/public/usbguard/Policy.cpp \
+	src/Library/public/usbguard/Rule.cpp \
+	src/Library/public/usbguard/RuleCondition.cpp \
+	src/Library/public/usbguard/RuleParser.cpp \
+	src/Library/public/usbguard/RuleParser.hpp \
+	src/Library/public/usbguard/RuleSet.cpp \
+	src/Library/public/usbguard/Typedefs.cpp \
+	src/Library/public/usbguard/USB.cpp \
+	src/Library/public/usbguard/USBGuard.cpp
 
 pkginclude_HEADERS=\
-	src/Library/ConfigFile.hpp \
-	src/Library/Interface.hpp \
-	src/Library/IPCClient.hpp \
-	src/Library/IPCServer.hpp \
-	src/Library/USB.hpp \
-	src/Library/Rule.hpp \
-	src/Library/RuleSet.hpp \
-	src/Library/Typedefs.hpp \
-	src/Library/DeviceManagerHooks.hpp \
-	src/Library/Device.hpp \
-	src/Library/DeviceManager.hpp \
-	src/Library/Logger.hpp \
-	src/Library/Predicates.hpp \
-	src/Library/Utility.hpp \
-	src/Library/Exception.hpp \
-	src/Library/USBGuard.hpp \
-	src/Library/Policy.hpp \
-	src/Library/Audit.hpp
+	src/Library/public/usbguard/Audit.hpp \
+	src/Library/public/usbguard/ConfigFile.hpp \
+	src/Library/public/usbguard/Device.hpp \
+	src/Library/public/usbguard/DeviceManager.hpp \
+	src/Library/public/usbguard/DeviceManagerHooks.hpp \
+	src/Library/public/usbguard/Exception.hpp \
+	src/Library/public/usbguard/IPCClient.hpp \
+	src/Library/public/usbguard/IPCServer.hpp \
+	src/Library/public/usbguard/Interface.hpp \
+	src/Library/public/usbguard/Logger.hpp \
+	src/Library/public/usbguard/Policy.hpp \
+	src/Library/public/usbguard/Predicates.hpp \
+	src/Library/public/usbguard/Rule.hpp \
+	src/Library/public/usbguard/RuleCondition.hpp \
+	src/Library/public/usbguard/RuleSet.hpp \
+	src/Library/public/usbguard/Typedefs.hpp \
+	src/Library/public/usbguard/USB.hpp \
+	src/Library/public/usbguard/USBGuard.hpp
 
 # Workaround for generated protobuf code mishaps
 #```
@@ -304,27 +325,31 @@ sbin_PROGRAMS=\
 usbguard_daemon_SOURCES=\
 	src/Daemon/Daemon.cpp \
 	src/Daemon/Daemon.hpp \
-	src/Daemon/Exceptions.hpp \
 	src/Daemon/main.cpp \
 	src/Daemon/Seccomp.c \
 	src/Daemon/Seccomp.h \
-	src/Common/CCBQueue.hpp \
 	src/Common/Utility.hpp \
-	src/Common/Utility.cpp
+	src/Common/Utility.cpp \
+	src/Daemon/FileAuditBackend.hpp \
+	src/Daemon/FileAuditBackend.cpp \
+	src/Daemon/LinuxAuditBackend.hpp \
+	src/Daemon/LinuxAuditBackend.cpp
 
 usbguard_daemon_CPPFLAGS=\
 	-fPIE \
 	$(AM_CPPFLAGS) \
 	@seccomp_CFLAGS@ \
-	@libcapng_CFLAGS@
+	@libcapng_CFLAGS@ \
+	@audit_CFLAGS@
 
 usbguard_daemon_LDADD=\
 	$(top_builddir)/libusbguard.la \
 	@seccomp_LIBS@ \
-	@libcapng_LIBS@
+	@libcapng_LIBS@ \
+	@audit_LIBS@
 
 EXTRA_DIST +=\
-	README.md \
+	README.adoc \
 	src/ThirdParty/Catch \
 	src/ThirdParty/PEGTL
 
@@ -398,8 +423,10 @@ usbguard_rule_parser_LDADD=\
 if DBUS_ENABLED
 sbin_PROGRAMS+= usbguard-dbus
 
+if DOCS_ENABLED
 man8_MANS+=\
-	$(top_builddir)/doc/usbguard-dbus.8
+	$(top_builddir)/doc/man/usbguard-dbus.8
+endif
 
 BUILT_SOURCES+=\
 	src/DBus/DBusInterface.xml.cstr \
@@ -528,6 +555,8 @@ usbguard_applet_qt_SOURCES_BASE=\
 	src/GUI.Qt/MainWindow.h \
 	src/GUI.Qt/DeviceModel.cpp \
 	src/GUI.Qt/DeviceModel.h \
+	src/GUI.Qt/SessionBlocker.cpp \
+	src/GUI.Qt/SessionBlocker.h \
 	src/GUI.Qt/TargetDelegate.cpp \
 	src/GUI.Qt/TargetDelegate.h
 
@@ -548,8 +577,10 @@ desktop_DATA = $(top_builddir)/src/GUI.Qt/usbguard-applet-qt.desktop
 appicondir = $(datadir)/icons/hicolor/scalable/apps
 appicon_DATA = src/GUI.Qt/resources/usbguard-icon.svg
 
+if DOCS_ENABLED
 man1_MANS +=\
-	$(top_builddir)/doc/usbguard-applet-qt.1
+	$(top_builddir)/doc/man/usbguard-applet-qt.1
+endif
 
 BUILT_SOURCES+=\
 	$(usbguard_applet_qt_UIHEADERS) \
@@ -564,6 +595,7 @@ CLEANFILES +=\
 	$(top_builddir)/src/GUI.Qt/usbguard.qrc.cpp \
 	$(top_builddir)/src/GUI.Qt/usbguard.qrc \
 	$(top_builddir)/src/GUI.Qt/DeviceModel.moc.cpp \
+	$(top_builddir)/src/GUI.Qt/SessionBlocker.moc.cpp \
 	$(top_builddir)/src/GUI.Qt/TargetDelegate.moc.cpp
 
 nodist_usbguard_applet_qt_SOURCES=\
@@ -572,6 +604,7 @@ nodist_usbguard_applet_qt_SOURCES=\
 	src/GUI.Qt/MainWindow.moc.cpp \
 	src/GUI.Qt/usbguard.qrc.cpp \
 	src/GUI.Qt/DeviceModel.moc.cpp \
+	src/GUI.Qt/SessionBlocker.moc.cpp \
 	src/GUI.Qt/TargetDelegate.moc.cpp
 
 usbguard_applet_qt_LDADD=\
@@ -629,38 +662,13 @@ endif
 $(DIST_ARCHIVES):
 	test -f "$@" || $(MAKE) dist
 
-rpmbuild: $(DIST_ARCHIVES)
-	test -n "$(RPMBUILD_FLAGS)"
-	$(eval RPMBUILD_ROOT:=$(shell mktemp -d -t usbguard-srpm.XXXXXX))
-	$(eval RPMBUILD_SOURCES:=$(RPMBUILD_ROOT)/SOURCE)
-	$(eval RPMBUILD_SPECS:=$(RPMBUILD_ROOT)/SPECS)
-	$(eval RPMBUILD_BUILDS:=$(RPMBUILD_ROOT)/BUILDS)
-	$(MKDIR_P) $(RPMBUILD_SOURCES)
-	$(MKDIR_P) $(RPMBUILD_SPECS)
-	cp $(top_srcdir)/usbguard.spec $(RPMBUILD_SPECS)
-	cp $(top_builddir)/$(DIST_ARCHIVES) $(RPMBUILD_SOURCES)
-	rpmbuild $(RPMBUILD_FLAGS) \
-		--define "_sourcedir $(RPMBUILD_SOURCES)" \
-		--define "_srcrpmdir $(top_builddir)" \
-		--define "_rpmdir $(top_builddir)" \
-		--define "_builddir $(RPMBUILD_BUILDS)" \
-		"$(RPMBUILD_SPECS)/usbguard.spec"
-	rm -rf "$(RPMBUILD_ROOT)"
-
-rpmbuild-bs:
-	$(MAKE) rpmbuild RPMBUILD_FLAGS=-bs
-
-rpmbuild-ba:
-	$(MAKE) rpmbuild RPMBUILD_FLAGS=-ba
-
-release-files: rpmbuild-bs
+release-files: $(DIST_ARCHIVES)
 	$(eval RELEASE_DIR:="release.$(PACKAGE)-$(VERSION)")
-	$(eval GPG:=$(shell test -n "$$QUBES_GPG_DOMAIN" && echo qubes-gpg-client || echo gpg2))
+	$(eval GPG:=$(shell test -n "$$QUBES_GPG_DOMAIN" && echo qubes-gpg-client-wrapper || echo gpg2))
 	$(MKDIR_P) $(RELEASE_DIR)
 	cp $(DIST_ARCHIVES) $(RELEASE_DIR)
-	cp $(PACKAGE)-$(VERSION)-*.src.rpm $(RELEASE_DIR)
-	cd $(RELEASE_DIR) && $(GPG) -b -a $(DIST_ARCHIVES) > $(DIST_ARCHIVES).sig
-	cd $(RELEASE_DIR) && openssl sha -sha256 $(DIST_ARCHIVES) > $(DIST_ARCHIVES).sum
+	cd $(RELEASE_DIR) && $(GPG) -b -a -o - $(DIST_ARCHIVES) > $(DIST_ARCHIVES).sig
+	cd $(RELEASE_DIR) && openssl sha256 $(DIST_ARCHIVES) > $(DIST_ARCHIVES).sum
 
 analyze-clang:
 	$(eval ANALYSIS_ROOT:=$(shell mktemp -d -t usbguard-analyze-clang.XXXXXX))
@@ -671,14 +679,8 @@ analyze-clang:
 	  make -j$(JOBS)
 	rm -rf "$(ANALYSIS_ROOT)"
 
-if MAINTAINER_MODE
-check-local: check-copyright
-
-check-copyright:
-	$(eval GIT_CLONE_ROOT:=$(shell mktemp -d -t usbguard-git-clone.XXXXXX))
-	git clone "$(abs_top_srcdir)" "$(GIT_CLONE_ROOT)" && \
-	  $(top_srcdir)/src/Tests/Packaging/files-without-copyright.sh "$(GIT_CLONE_ROOT)"
-	rm -rf "$(GIT_CLONE_ROOT)"
-else
-check-local:
-endif
+#
+# overriding 'check' target to enable "make check" to perform build as well
+#
+check: all
+	$(MAKE) $(AM_MAKEFLAGS) check-recursive

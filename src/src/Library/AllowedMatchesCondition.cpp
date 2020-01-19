@@ -16,14 +16,19 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
 #include "AllowedMatchesCondition.hpp"
-#include "RuleParser.hpp"
-#include "Logger.hpp"
-#include <Interface.hpp>
+
+#include "usbguard/Interface.hpp"
+#include "usbguard/Logger.hpp"
+#include "usbguard/RuleParser.hpp"
 
 namespace usbguard
 {
-  AllowedMatchesCondition::AllowedMatchesCondition(const String& device_spec, bool negated)
+  AllowedMatchesCondition::AllowedMatchesCondition(const std::string& device_spec, bool negated)
     : RuleConditionBase("allowed-matches", device_spec, negated)
   {
     _device_match_rule = parseRuleFromString(std::string("allow ") + device_spec);
@@ -37,27 +42,27 @@ namespace usbguard
     _interface_ptr = rhs._interface_ptr;
   }
 
-  void AllowedMatchesCondition::init(Interface * const interface_ptr)
+  void AllowedMatchesCondition::init(Interface* const interface_ptr)
   {
-
     _interface_ptr = interface_ptr;
   }
 
   bool AllowedMatchesCondition::update(const Rule& rule)
   {
     (void)rule;
-    if (_interface_ptr == nullptr) {
 
+    if (_interface_ptr == nullptr) {
       return false;
     }
-    auto devices = _interface_ptr->listDevices(_device_match_rule.toString());
 
+    auto devices = _interface_ptr->listDevices(_device_match_rule.toString());
     return !devices.empty();
   }
 
-  RuleConditionBase * AllowedMatchesCondition::clone() const
+  RuleConditionBase* AllowedMatchesCondition::clone() const
   {
     return new AllowedMatchesCondition(*this);
   }
 } /* namespace usbguard */
 
+/* vim: set ts=2 sw=2 et */

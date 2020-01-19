@@ -17,23 +17,31 @@
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
 #pragma once
-#include "Typedefs.hpp"
-#include "RuleCondition.hpp"
-#include "Rule.hpp"
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
+#include "usbguard/RuleCondition.hpp"
+
+#include "usbguard/Rule.hpp"
+#include "usbguard/Typedefs.hpp"
+
+#include <string>
 
 namespace usbguard
 {
   class AllowedMatchesCondition : public RuleConditionBase
   {
   public:
-    AllowedMatchesCondition(const String& device_spec, bool negated = false);
+    AllowedMatchesCondition(const std::string& device_spec, bool negated = false);
     AllowedMatchesCondition(const AllowedMatchesCondition& rhs);
-    void init(Interface * const interface_ptr);
+    void init(Interface* const interface_ptr);
     bool update(const Rule& rule);
-    RuleConditionBase * clone() const;
+    RuleConditionBase* clone() const;
   private:
     Rule _device_match_rule;
-    Interface * _interface_ptr;
+    Interface* _interface_ptr;
   };
 } /* namespace usbguard */
 
+/* vim: set ts=2 sw=2 et */

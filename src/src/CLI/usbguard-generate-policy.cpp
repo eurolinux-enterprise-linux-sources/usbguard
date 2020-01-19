@@ -16,18 +16,23 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
-#include <iostream>
-#include <DeviceManager.hpp>
-#include <unistd.h>
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
 
 #include "usbguard.hpp"
 #include "usbguard-generate-policy.hpp"
 #include "PolicyGenerator.hpp"
 #include "Common/Utility.hpp"
 
+#include "usbguard/DeviceManager.hpp"
+
+#include <iostream>
+#include <unistd.h>
+
 namespace usbguard
 {
-  static const char *options_short = "hpPt:HX";
+  static const char* options_short = "hpPt:HX";
 
   static const struct ::option options_long[] = {
     { "help", no_argument, nullptr, 'h' },
@@ -55,7 +60,7 @@ namespace usbguard
     stream << std::endl;
   }
 
-  int usbguard_generate_policy(int argc, char **argv)
+  int usbguard_generate_policy(int argc, char** argv)
   {
     bool port_specific = false;
     bool port_specific_noserial = true;
@@ -66,45 +71,52 @@ namespace usbguard
     int opt = 0;
 
     while ((opt = getopt_long(argc, argv, options_short, options_long, nullptr)) != -1) {
-      switch(opt) {
-        case 'h':
-          showHelp(std::cout);
-          return EXIT_SUCCESS;
-        case 'p':
-          port_specific = true;
-          break;
-        case 'P':
-          port_specific_noserial = false;
-          break;
-        case 't':
-          with_catchall = true;
-          catchall_target = optarg;
-          break;
-        case 'H':
-          only_hashes = true;
-          break;
-        case 'X':
-          with_hashes = false;
-          break;
-        case '?':
-          showHelp(std::cerr);
-        default:
-          return EXIT_FAILURE;
+      switch (opt) {
+      case 'h':
+        showHelp(std::cout);
+        return EXIT_SUCCESS;
+
+      case 'p':
+        port_specific = true;
+        break;
+
+      case 'P':
+        port_specific_noserial = false;
+        break;
+
+      case 't':
+        with_catchall = true;
+        catchall_target = optarg;
+        break;
+
+      case 'H':
+        only_hashes = true;
+        break;
+
+      case 'X':
+        with_hashes = false;
+        break;
+
+      case '?':
+        showHelp(std::cerr);
+
+      default:
+        return EXIT_FAILURE;
       }
     }
 
     PolicyGenerator generator;
-
     generator.setWithHashAttribute(with_hashes);
     generator.setHashOnly(only_hashes);
     generator.setPortSpecificRules(port_specific);
     generator.setPortSpecificNoSerialRules(port_specific_noserial);
     generator.setExplicitCatchAllRule(with_catchall,
-                                      Rule::targetFromString(catchall_target));
+      Rule::targetFromString(catchall_target));
     generator.generate();
     const RuleSet& ruleset = generator.refRuleSet();
     ruleset.save(std::cout);
-
     return EXIT_SUCCESS;
   }
 } /* namespace usbguard */
+
+/* vim: set ts=2 sw=2 et */

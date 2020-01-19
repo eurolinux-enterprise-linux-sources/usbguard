@@ -16,8 +16,13 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
 #include "FixedStateCondition.hpp"
-#include "RuleParser.hpp"
+
+#include "usbguard/RuleParser.hpp"
 
 namespace usbguard
 {
@@ -39,9 +44,10 @@ namespace usbguard
     return _state;
   }
 
-  RuleConditionBase * FixedStateCondition::clone() const
+  RuleConditionBase* FixedStateCondition::clone() const
   {
     return new FixedStateCondition(*this);
   }
 } /* namespace usbguard */
 
+/* vim: set ts=2 sw=2 et */

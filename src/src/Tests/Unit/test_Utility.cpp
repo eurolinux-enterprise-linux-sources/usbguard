@@ -21,7 +21,8 @@
 
 using namespace usbguard;
 
-TEST_CASE("parentPath", "[Utility]") {
+TEST_CASE("parentPath", "[Utility]")
+{
   REQUIRE(parentPath("/a/b/c/d") == "/a/b/c");
   REQUIRE(parentPath("/a/b/c/d/") == "/a/b/c");
   REQUIRE(parentPath("/a/b/c/d//") == "/a/b/c");
@@ -30,14 +31,15 @@ TEST_CASE("parentPath", "[Utility]") {
   REQUIRE(parentPath("/foo/bar") == "/foo");
   REQUIRE(parentPath("/foo/bar/") == "/foo");
   REQUIRE(parentPath("/foo/bar//") == "/foo");
-  REQUIRE(parentPath("/foo") == String());
-  REQUIRE(parentPath("/foo/") == String());
-  REQUIRE(parentPath("/") == String());
-  REQUIRE(parentPath("//") == String());
-  REQUIRE(parentPath("///") == String());
-  REQUIRE(parentPath("//foo") == String());
-  REQUIRE(parentPath("//foo//") == String());
-  REQUIRE(parentPath("") == String());
-  REQUIRE(parentPath(String()) == String());
+  REQUIRE(parentPath("/foo") == std::string());
+  REQUIRE(parentPath("/foo/") == std::string());
+  REQUIRE(parentPath("/") == std::string());
+  REQUIRE(parentPath("//") == std::string());
+  REQUIRE(parentPath("///") == std::string());
+  REQUIRE(parentPath("//foo") == std::string());
+  REQUIRE(parentPath("//foo//") == std::string());
+  REQUIRE(parentPath("") == std::string());
+  REQUIRE(parentPath(std::string()) == std::string());
 }
 
+/* vim: set ts=2 sw=2 et */

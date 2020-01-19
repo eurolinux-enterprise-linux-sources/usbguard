@@ -17,9 +17,15 @@
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
 #pragma once
-#include "Typedefs.hpp"
-#include "RuleCondition.hpp"
-#include "Rule.hpp"
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
+#include "usbguard/RuleCondition.hpp"
+
+#include "usbguard/Typedefs.hpp"
+#include "usbguard/Rule.hpp"
+
 #include <chrono>
 
 namespace usbguard
@@ -27,14 +33,15 @@ namespace usbguard
   class RuleEvaluatedCondition : public RuleConditionBase
   {
   public:
-    RuleEvaluatedCondition(const String& elapsed_time, bool negated = false);
+    RuleEvaluatedCondition(const std::string& elapsed_time, bool negated = false);
     RuleEvaluatedCondition(const RuleEvaluatedCondition& rhs);
     bool update(const Rule& rule);
-    RuleConditionBase * clone() const;
+    RuleConditionBase* clone() const;
   protected:
-    static uint64_t stringToSeconds(const String& string);
+    static uint64_t stringToSeconds(const std::string& string);
   private:
     std::chrono::steady_clock::duration _elapsed_time;
   };
 } /* namespace usbguard */
 
+/* vim: set ts=2 sw=2 et */

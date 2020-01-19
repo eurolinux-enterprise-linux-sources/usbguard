@@ -16,12 +16,17 @@
 //
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
-#include "IPCPrivate.hpp"
-#include "Logger.hpp"
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
 
-#include <Devices.pb.h>
-#include <Exception.pb.h>
-#include <Policy.pb.h>
+#include "IPCPrivate.hpp"
+
+#include "Devices.pb.h"
+#include "Exception.pb.h"
+#include "Policy.pb.h"
+
+#include "usbguard/Logger.hpp"
 
 #include <vector>
 #include <utility>
@@ -48,6 +53,7 @@ namespace usbguard
         return type_number.first;
       }
     }
+
     throw std::runtime_error("Unknown IPC message type name");
   }
 
@@ -58,19 +64,18 @@ namespace usbguard
         return type_number.second;
       }
     }
+
     throw std::runtime_error("Unknown IPC message type number");
   }
 
   IPC::MessagePointer IPC::IPCExceptionToMessage(const IPCException& exception)
   {
-    IPC::Exception * const message = new IPC::Exception();
+    IPC::Exception* const message = new IPC::Exception();
     IPC::MessagePointer pointer(message);
-
     message->set_context(exception.context());
     message->set_object(exception.object());
     message->set_reason(exception.reason());
     message->set_request_id(exception.messageID());
-
     return pointer;
   }
 
@@ -78,11 +83,10 @@ namespace usbguard
   {
     const IPC::Exception* const exception_message = \
       reinterpret_cast<const IPC::Exception*>(message.get());
-
     return IPCException(exception_message->context(),
-                        exception_message->object(),
-                        exception_message->reason(),
-                        exception_message->request_id());
+        exception_message->object(),
+        exception_message->reason(),
+        exception_message->request_id());
   }
 
   bool IPC::isExceptionMessage(const MessagePointer& message)
@@ -101,7 +105,6 @@ namespace usbguard
     }
 
     const auto header = reinterpret_cast<const IPC::MessageHeader&>(header_message);
-
     return header.id();
   }
 
@@ -119,3 +122,5 @@ namespace usbguard
     header->set_id(id);
   }
 } /* namespace usbguard */
+
+/* vim: set ts=2 sw=2 et */

@@ -17,14 +17,22 @@
 // Authors: Daniel Kopecek <dkopecek@redhat.com>
 //
 #pragma once
-#include "Typedefs.hpp"
+#ifdef HAVE_BUILD_CONFIG_H
+  #include <build-config.h>
+#endif
+
+#include "usbguard/Typedefs.hpp"
+
+#include <string>
 
 namespace usbguard
 {
   namespace Utility
   {
-     String escapeString(const String& value);
-     String unescapeString(const String& value);
-     String quoteEscapeString(const String& value);
+    std::string escapeString(const std::string& value);
+    std::string unescapeString(const std::string& value);
+    std::string quoteEscapeString(const std::string& value);
   }
 } /* namespace usbguard */
+
+/* vim: set ts=2 sw=2 et */
